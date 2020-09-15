@@ -20,7 +20,86 @@ describe("Tetris", () => {
     const shape = game.getCurrentShape();
     expect(shape.y).toBe(1);
   });
+
+  it("has all the classic shapes composed of 4 blocks, in all their rotations", () => {
+    const shapeNames = Object.keys(Tetris.shapes);
+    expect(shapeNames).toEqual(
+      jasmine.arrayContaining(["I", "O", "T", "S", "Z", "J", "L"])
+    );
+    shapeNames.forEach((name) => {
+      const rotations = Tetris.shapes[name];
+      // expect(rotations.length).toBeGreaterThan(0);
+      rotations.forEach(
+        (rotation) =>
+          expect(rotation.blocks.length).toBe(4) &&
+          rotation.blocks.forEach((coordinate) =>
+            expect(coordinate.length).toBe(2)
+          )
+      );
+    });
+
+    expect(Tetris.shapes["O"].length).toBe(1);
+  });
 });
+
+describe("parseShape", () => {
+  it("takes a string representation and returns a shape object", () => {
+    expect(
+      parseShape(`
+#
+#
+#
+#
+    `)
+    ).toEqual({
+      blocks: [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [0, 3],
+      ],
+    });
+    expect(
+      parseShape(`
+####
+    `)
+    ).toEqual({
+      blocks: [
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [3, 0],
+      ],
+    });
+    expect(
+      parseShape(`
+ ##
+##
+    `)
+    ).toEqual({
+      blocks: [
+        [1, 0],
+        [2, 0],
+        [0, 1],
+        [1, 1],
+      ],
+    });
+  });
+});
+
+function parseShape(string) {
+  const split = string.split("\n");
+  const rows = split.slice(1, split.length - 1);
+  const blocks = [];
+  rows.forEach((row, y) =>
+    [...row].forEach((s, x) => {
+      if (s === "#") {
+        blocks.push([x, y]);
+      }
+    })
+  );
+  return { blocks };
+}
 
 function Tetris() {
   const area = {
@@ -37,3 +116,107 @@ function Tetris() {
     currentShape.y++;
   };
 }
+
+Tetris.shapes = {
+  J: [
+    parseShape(`
+#
+###
+    `),
+    parseShape(`
+ ##
+ #
+ #
+    `),
+    parseShape(`
+
+###
+  #
+    `),
+    parseShape(`
+ #
+ #
+##
+    `),
+  ],
+  I: [
+    parseShape(`
+#
+#
+#
+#
+    `),
+    parseShape(`
+####
+    `),
+  ],
+  O: [
+    parseShape(`
+##
+##
+    `),
+  ],
+  T: [
+    parseShape(`
+ #
+###
+    `),
+    parseShape(`
+ #
+ ##
+ #
+    `),
+    parseShape(`
+
+###
+ #
+    `),
+    parseShape(`
+ #
+##
+ #
+    `),
+  ],
+  S: [
+    parseShape(`
+ ##
+##
+    `),
+    parseShape(`
+#
+##
+ #
+    `),
+  ],
+  Z: [
+    parseShape(`
+##
+ ##
+    `),
+    parseShape(`
+ #
+##
+#
+    `),
+  ],
+  L: [
+    parseShape(`
+  #
+###
+    `),
+    parseShape(`
+ #
+ #
+ ##
+    `),
+    parseShape(`
+###
+#
+    `),
+    parseShape(`
+##
+ #
+ #
+    `),
+  ],
+};
