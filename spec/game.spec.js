@@ -14,9 +14,11 @@ describe("Tetris", () => {
     expect(shape.x).toBe(Math.floor(width / 2 - shape.width / 2));
   });
 
-  it("drops shapes down one step every tick", () => {
+  it("drops shapes down one step when enough ticks pass", () => {
     const game = new Tetris();
-    game.tick();
+    for (let i = 0; i < game.ticksPerDrop; i++) {
+      game.tick();
+    }
     const shape = game.getCurrentShape();
     expect(shape.y).toBe(1);
   });
@@ -106,14 +108,19 @@ function Tetris() {
     width: 10,
     height: 40,
   };
+  this.ticksPerDrop = 5;
   let currentShape = {};
   currentShape.width = 4;
   currentShape.x = Math.floor(area.width / 2 - currentShape.width / 2);
   currentShape.y = 0;
+  currentShape.timeToDrop = this.ticksPerDrop;
   this.getAreaDimensions = () => area;
   this.getCurrentShape = () => currentShape;
   this.tick = () => {
-    currentShape.y++;
+    if (--currentShape.timeToDrop === 0) {
+      currentShape.timeToDrop = this.ticksPerDrop;
+      currentShape.y++;
+    }
   };
 }
 
