@@ -10,17 +10,18 @@ describe("Tetris", () => {
 
   it("has a shape at the top and center when the game starts", () => {
     const game = new Tetris();
-    const shape = game.getPiece();
+    const piece = game.getPiece();
     const { width } = game.getAreaDimensions();
-    expect(shape.y).toBe(0);
-    expect(shape.x).toBe(Math.floor(width / 2 - shape.width / 2));
+    expect(piece.shape).toBeTruthy();
+    expect(piece.y).toBe(0);
+    expect(piece.x).toBe(Math.floor(width / 2 - piece.shape.width / 2));
   });
 
   it("drops shapes down one step when enough ticks pass", () => {
     const game = new Tetris();
     tickTilDrop(game);
-    const shape = game.getPiece();
-    expect(shape.y).toBe(1);
+    const piece = game.getPiece();
+    expect(piece.y).toBe(1);
   });
 
   it("has all the classic shapes composed of 4 blocks, in all their rotations", () => {
@@ -41,9 +42,20 @@ describe("Tetris", () => {
     expect(Tetris.shapes["O"].length).toBe(1);
   });
 
+  it("considers piece at the bottom if the next drop puts the piece beyond the bottom of the play area", () => {
+    const game = new Tetris();
+    game.newPiece(Tetris.shapes.I[0]);
+    const { height } = game.getAreaDimensions();
+    while (game.getPiece().y < height - 1) {
+      expect(game.pieceIsAtBottom()).toBeFalse(game.getPiece());
+      game.drop();
+    }
+    expect(game.pieceIsAtBottom()).toBeTrue();
+  });
+
   // it("makes current shape part of the play area after it hits the bottom", () => {
   //   const game = new Tetris();
-  //   while (!game.getPiece().atBottom()) {
+  //   while (!game.pieceIsAtBottom()) {
   //     game.tick();
   //   }
   //   tickTilDrop(game);
@@ -62,19 +74,31 @@ function Tetris() {
     height: 40,
   };
   this.ticksPerDrop = 5;
-  let piece = {};
-  piece.width = 4;
-  piece.x = Math.floor(area.width / 2 - piece.width / 2);
-  piece.y = 0;
-  piece.timeToDrop = this.ticksPerDrop;
+  let piece;
+
   this.getAreaDimensions = () => area;
   this.getPiece = () => piece;
   this.tick = () => {
     if (--piece.timeToDrop === 0) {
-      piece.timeToDrop = this.ticksPerDrop;
-      piece.y++;
+      this.drop();
     }
   };
+  this.pieceIsAtBottom = () => {
+    return piece.shape.blocks.some(([x, y]) => piece.y + y + 1 >= area.height);
+  };
+  this.newPiece = (shape) => {
+    piece = {};
+    piece.width = 4;
+    piece.shape = shape;
+    piece.x = Math.floor(area.width / 2 - piece.width / 2);
+    piece.y = 0;
+    piece.timeToDrop = this.ticksPerDrop;
+  };
+  this.drop = () => {
+    piece.timeToDrop = this.ticksPerDrop;
+    piece.y++;
+  };
+  this.newPiece(Tetris.shapes.T[0]);
 }
 
 Tetris.shapes = {
@@ -101,13 +125,13 @@ Tetris.shapes = {
   ],
   I: [
     parseShape(`
-#
-#
-#
-#
+####
     `),
     parseShape(`
-####
+#
+#
+#
+#
     `),
   ],
   O: [
