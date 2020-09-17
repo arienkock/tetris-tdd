@@ -53,6 +53,32 @@ describe("Tetris", () => {
     expect(game.pieceIsAtBottom()).toBeTrue();
   });
 
+  it("moves the piece left and right until it hits the edges", () => {
+    const game = new Tetris();
+    game.newPiece(Tetris.shapes.I[0]);
+    const previousX = game.getPiece().x;
+    game.moveLeft();
+    expect(game.getPiece().x).toBe(previousX - 1);
+    game.moveLeft();
+    expect(game.getPiece().x).toBe(1);
+    game.moveLeft();
+    expect(game.getPiece().x).toBe(0);
+    game.moveLeft();
+    expect(game.getPiece().x).toBe(0);
+
+    game.moveRight();
+    expect(game.getPiece().x).toBe(1);
+    game.moveRight();
+    expect(game.getPiece().x).toBe(2);
+    game.moveRight();
+    game.moveRight();
+    game.moveRight();
+    game.moveRight();
+    expect(game.getPiece().x).toBe(6);
+    game.moveRight();
+    expect(game.getPiece().x).toBe(6);
+  });
+
   // it("makes current shape part of the play area after it hits the bottom", () => {
   //   const game = new Tetris();
   //   while (!game.pieceIsAtBottom()) {
@@ -99,6 +125,12 @@ function Tetris() {
     piece.y++;
   };
   this.newPiece(Tetris.shapes.T[0]);
+  this.moveLeft = () => {
+    piece.x = Math.max(0, piece.x - 1);
+  };
+  this.moveRight = () => {
+    piece.x = Math.min(area.width - piece.shape.width, piece.x + 1);
+  };
 }
 
 Tetris.shapes = {
