@@ -1,4 +1,4 @@
-const { parseShape } = require("./parseShape");
+const { parseShape } = require("../src/parseShape");
 
 describe("parseShape", () => {
   it("takes a string representation and returns a shape object", () => {

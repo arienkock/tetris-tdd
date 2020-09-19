@@ -13,5 +13,8 @@
   "dependencies": {
     "jasmine": "^3.6.1",
     "nodemon": "^2.0.4"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.2"
   }
 }
