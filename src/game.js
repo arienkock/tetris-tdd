@@ -7,6 +7,7 @@ function Tetris() {
   };
   this.ticksPerDrop = 5;
   let piece;
+  let areaContents = new Array(area.width * area.height);
 
   this.getAreaDimensions = () => area;
   this.getPiece = () => piece;
@@ -28,7 +29,13 @@ function Tetris() {
   };
   this.drop = () => {
     piece.timeToDrop = this.ticksPerDrop;
-    piece.y++;
+    if (this.pieceIsAtBottom()) {
+      piece.shape.blocks.forEach(([x, y]) => {
+        setAreaContents(x + piece.x, y + piece.y, true);
+      });
+    } else {
+      piece.y++;
+    }
   };
   this.newPiece(Tetris.shapes.T[0]);
   this.moveLeft = () => {
@@ -37,6 +44,12 @@ function Tetris() {
   this.moveRight = () => {
     piece.x = Math.min(area.width - piece.shape.width, piece.x + 1);
   };
+  this.getAreaContents = (x, y) => {
+    return areaContents[y * area.width + x];
+  };
+  function setAreaContents(x, y, value) {
+    areaContents[y * area.width + x] = value;
+  }
 }
 
 Tetris.shapes = {

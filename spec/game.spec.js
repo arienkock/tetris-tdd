@@ -80,13 +80,28 @@ describe("Tetris", () => {
     expect(game.getPiece().x).toBe(6);
   });
 
-  // it("makes current shape part of the play area after it hits the bottom", () => {
-  //   const game = new Tetris();
-  //   while (!game.pieceIsAtBottom()) {
-  //     game.tick();
-  //   }
-  //   tickTilDrop(game);
-  // });
+  it("makes current shape part of the play area after it hits the bottom", () => {
+    const game = new Tetris();
+    while (!game.pieceIsAtBottom()) {
+      game.drop();
+    }
+    const pieceBeforeFinalDrop = game.getPiece();
+    const { x: pieceX, y: pieceY } = pieceBeforeFinalDrop;
+    game.drop();
+    const { width, height } = game.getAreaDimensions();
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const isCoordFromLastPiece = pieceBeforeFinalDrop.shape.blocks.some(
+          ([bx, by]) => bx + pieceX === x && by + pieceY === y
+        );
+        if (isCoordFromLastPiece) {
+          expect(game.getAreaContents(x, y)).toBeTruthy();
+        } else {
+          expect(game.getAreaContents(x, y)).toBeFalsy();
+        }
+      }
+    }
+  });
 });
 
 function tickTilDrop(game) {
