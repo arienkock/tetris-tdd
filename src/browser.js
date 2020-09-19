@@ -27,13 +27,24 @@ function paint() {
   });
   const piece = game.getPiece();
   piece.shape.blocks.forEach(([x, y]) => {
-    const td = document.querySelector(`.block-${x + piece.x}-${y + piece.y}`);
-    if (!td) {
-      console.error("No block for", `.block-${x + piece.x}-${y + piece.y}`);
-    } else {
-      td.classList.add("active");
-    }
+    activate(x + piece.x, y + piece.y);
   });
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (game.getAreaContents(x, y)) {
+        activate(x, y);
+      }
+    }
+  }
+}
+
+function activate(x, y) {
+  const td = document.querySelector(`.block-${x}-${y}`);
+  if (!td) {
+    console.error("No block for", `.block-${x}-${y}`);
+  } else {
+    td.classList.add("active");
+  }
 }
 
 document.addEventListener("keydown", (event) => {

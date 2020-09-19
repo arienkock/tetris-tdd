@@ -33,6 +33,7 @@ function Tetris() {
       piece.shape.blocks.forEach(([x, y]) => {
         setAreaContents(x + piece.x, y + piece.y, true);
       });
+      this.newPiece(randomShape());
     } else {
       piece.y++;
     }
@@ -50,6 +51,13 @@ function Tetris() {
   function setAreaContents(x, y, value) {
     areaContents[y * area.width + x] = value;
   }
+}
+
+function randomShape() {
+  const shapeNames = Object.keys(Tetris.shapes);
+  const randomIndex = Math.floor(Math.random() * shapeNames.length);
+  const shape = shapeNames[randomIndex];
+  return Tetris.shapes[shape][0];
 }
 
 Tetris.shapes = {

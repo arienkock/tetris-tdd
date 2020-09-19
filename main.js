@@ -28,13 +28,24 @@ function paint() {
   });
   const piece = game.getPiece();
   piece.shape.blocks.forEach(([x, y]) => {
-    const td = document.querySelector(`.block-${x + piece.x}-${y + piece.y}`);
-    if (!td) {
-      console.error("No block for", `.block-${x + piece.x}-${y + piece.y}`);
-    } else {
-      td.classList.add("active");
-    }
+    activate(x + piece.x, y + piece.y);
   });
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (game.getAreaContents(x, y)) {
+        activate(x, y);
+      }
+    }
+  }
+}
+
+function activate(x, y) {
+  const td = document.querySelector(`.block-${x}-${y}`);
+  if (!td) {
+    console.error("No block for", `.block-${x}-${y}`);
+  } else {
+    td.classList.add("active");
+  }
 }
 
 document.addEventListener("keydown", (event) => {
@@ -58,6 +69,7 @@ function Tetris() {
   };
   this.ticksPerDrop = 5;
   let piece;
+  let areaContents = new Array(area.width * area.height);
 
   this.getAreaDimensions = () => area;
   this.getPiece = () => piece;
@@ -79,7 +91,14 @@ function Tetris() {
   };
   this.drop = () => {
     piece.timeToDrop = this.ticksPerDrop;
-    piece.y++;
+    if (this.pieceIsAtBottom()) {
+      piece.shape.blocks.forEach(([x, y]) => {
+        setAreaContents(x + piece.x, y + piece.y, true);
+      });
+      this.newPiece(randomShape());
+    } else {
+      piece.y++;
+    }
   };
   this.newPiece(Tetris.shapes.T[0]);
   this.moveLeft = () => {
@@ -88,6 +107,19 @@ function Tetris() {
   this.moveRight = () => {
     piece.x = Math.min(area.width - piece.shape.width, piece.x + 1);
   };
+  this.getAreaContents = (x, y) => {
+    return areaContents[y * area.width + x];
+  };
+  function setAreaContents(x, y, value) {
+    areaContents[y * area.width + x] = value;
+  }
+}
+
+function randomShape() {
+  const shapeNames = Object.keys(Tetris.shapes);
+  const randomIndex = Math.floor(Math.random() * shapeNames.length);
+  const shape = shapeNames[randomIndex];
+  return Tetris.shapes[shape][0];
 }
 
 Tetris.shapes = {
