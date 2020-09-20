@@ -51,8 +51,10 @@ function activate(x, y) {
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
     game.moveLeft();
+    paint();
   } else if (event.key === "ArrowRight") {
     game.moveRight();
+    paint();
   }
 });
 
