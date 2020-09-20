@@ -102,6 +102,13 @@ describe("Tetris", () => {
       }
     }
   });
+
+  it("cycles through all rotations of a shape", () => {
+    const game = new Tetris();
+    game.newPiece(Tetris.shapes.I[0]);
+    game.rotate();
+    expect(game.getPiece().shape).toEqual(Tetris.shapes.I[1]);
+  });
 });
 
 function tickTilDrop(game) {

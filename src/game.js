@@ -5,7 +5,7 @@ function Tetris() {
     width: 10,
     height: 40,
   };
-  this.ticksPerDrop = 5;
+  this.ticksPerDrop = 2;
   let piece;
   let areaContents = new Array(area.width * area.height);
 
@@ -47,6 +47,17 @@ function Tetris() {
   };
   this.getAreaContents = (x, y) => {
     return areaContents[y * area.width + x];
+  };
+  this.rotate = () => {
+    for (let rotations of Object.values(Tetris.shapes)) {
+      for (let i = 0; i < rotations.length; i++) {
+        let shape = rotations[i];
+        if (shape === piece.shape) {
+          piece.shape = rotations[(i + 1) % rotations.length];
+          return;
+        }
+      }
+    }
   };
   function setAreaContents(x, y, value) {
     areaContents[y * area.width + x] = value;
