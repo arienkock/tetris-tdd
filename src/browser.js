@@ -54,6 +54,9 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "ArrowRight") {
     game.moveRight();
     paint();
+  } else if (event.key === "ArrowUp") {
+    game.rotate();
+    paint();
   }
 });
 

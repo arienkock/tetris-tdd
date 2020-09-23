@@ -11,11 +11,17 @@ describe("Tetris", () => {
 
   it("has a shape at the top and center when the game starts", () => {
     const game = new Tetris();
-    const piece = game.getPiece();
+    game.newPiece(Tetris.shapes.I[0]);
     const { width } = game.getAreaDimensions();
-    expect(piece.shape).toBeTruthy();
-    expect(piece.y).toBe(0);
-    expect(piece.x).toBe(Math.floor(width / 2 - piece.shape.width / 2));
+    const iPiece = game.getPiece();
+    expect(iPiece.shape).toBeTruthy();
+    expect(iPiece.y).toBe(0);
+    expect(iPiece.x).toBe(3);
+    game.newPiece(Tetris.shapes.O[0]);
+    const oPiece = game.getPiece();
+    expect(oPiece.y).toBe(0);
+    expect(oPiece.x).toBe(4);
+    expect(oPiece.shape.width).toBe(2);
   });
 
   it("drops shapes down one step when enough ticks pass", () => {
@@ -108,6 +114,29 @@ describe("Tetris", () => {
     game.newPiece(Tetris.shapes.I[0]);
     game.rotate();
     expect(game.getPiece().shape).toEqual(Tetris.shapes.I[1]);
+  });
+
+  it("stacks the blocks", () => {
+    const game = new Tetris();
+    game.newPiece(Tetris.shapes.I[0]);
+    while (!game.pieceIsAtBottom()) {
+      game.drop();
+    }
+    game.drop();
+    game.newPiece(Tetris.shapes.O[0]);
+    while (!game.pieceIsAtBottom()) {
+      game.drop();
+    }
+    game.drop();
+    const { height } = game.getAreaDimensions();
+    const expectedShape = parseShape(`
+    ##
+    ##
+   ####
+    `);
+    expectedShape.blocks.forEach(([x, y]) => {
+      expect(game.getAreaContents(x, y + height - 3)).toBeTruthy();
+    });
   });
 });
 

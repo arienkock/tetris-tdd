@@ -17,13 +17,17 @@ function Tetris() {
     }
   };
   this.pieceIsAtBottom = () => {
-    return piece.shape.blocks.some(([x, y]) => piece.y + y + 1 >= area.height);
+    return piece.shape.blocks.some(
+      ([x, y]) =>
+        piece.y + y + 1 >= area.height ||
+        this.getAreaContents(piece.x + x, piece.y + y + 1)
+    );
   };
   this.newPiece = (shape) => {
     piece = {};
-    piece.width = 4;
+    piece.width = shape.width;
     piece.shape = shape;
-    piece.x = Math.floor(area.width / 2 - piece.width / 2);
+    piece.x = Math.floor((area.width - piece.width) / 2);
     piece.y = 0;
     piece.timeToDrop = this.ticksPerDrop;
   };
@@ -78,9 +82,9 @@ Tetris.shapes = {
 ###
       `),
     parseShape(`
-##
-#
-#
+ ##
+ #
+ #
       `),
     parseShape(`
 
@@ -98,16 +102,16 @@ Tetris.shapes = {
 ####
       `),
     parseShape(`
-#
-#
-#
-#
+ #
+ #
+ #
+ #
       `),
   ],
   O: [
     parseShape(`
-  ##
-  ##
+##
+##
       `),
   ],
   T: [

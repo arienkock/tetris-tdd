@@ -55,6 +55,9 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "ArrowRight") {
     game.moveRight();
     paint();
+  } else if (event.key === "ArrowUp") {
+    game.rotate();
+    paint();
   }
 });
 
@@ -69,7 +72,7 @@ function Tetris() {
     width: 10,
     height: 40,
   };
-  this.ticksPerDrop = 5;
+  this.ticksPerDrop = 2;
   let piece;
   let areaContents = new Array(area.width * area.height);
 
@@ -81,7 +84,11 @@ function Tetris() {
     }
   };
   this.pieceIsAtBottom = () => {
-    return piece.shape.blocks.some(([x, y]) => piece.y + y + 1 >= area.height);
+    return piece.shape.blocks.some(
+      ([x, y]) =>
+        piece.y + y + 1 >= area.height ||
+        this.getAreaContents(piece.x + x, piece.y + y + 1)
+    );
   };
   this.newPiece = (shape) => {
     piece = {};
@@ -111,6 +118,17 @@ function Tetris() {
   };
   this.getAreaContents = (x, y) => {
     return areaContents[y * area.width + x];
+  };
+  this.rotate = () => {
+    for (let rotations of Object.values(Tetris.shapes)) {
+      for (let i = 0; i < rotations.length; i++) {
+        let shape = rotations[i];
+        if (shape === piece.shape) {
+          piece.shape = rotations[(i + 1) % rotations.length];
+          return;
+        }
+      }
+    }
   };
   function setAreaContents(x, y, value) {
     areaContents[y * area.width + x] = value;
