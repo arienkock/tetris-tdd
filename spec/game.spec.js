@@ -62,28 +62,37 @@ describe("Tetris", () => {
 
   it("moves the piece left and right until it hits the edges", () => {
     const game = new Tetris();
-    game.newPiece(Tetris.shapes.I[0]);
+    game.newPiece(
+      parseShape(`
+ #
+    `)
+    );
     const previousX = game.getPiece().x;
     game.moveLeft();
     expect(game.getPiece().x).toBe(previousX - 1);
     game.moveLeft();
+    expect(game.getPiece().x).toBe(2);
+    game.moveLeft();
     expect(game.getPiece().x).toBe(1);
     game.moveLeft();
     expect(game.getPiece().x).toBe(0);
     game.moveLeft();
-    expect(game.getPiece().x).toBe(0);
+    expect(game.getPiece().x).toBe(-1);
 
     game.moveRight();
+    expect(game.getPiece().x).toBe(0);
+    game.moveRight();
     expect(game.getPiece().x).toBe(1);
     game.moveRight();
-    expect(game.getPiece().x).toBe(2);
     game.moveRight();
     game.moveRight();
     game.moveRight();
     game.moveRight();
-    expect(game.getPiece().x).toBe(6);
     game.moveRight();
-    expect(game.getPiece().x).toBe(6);
+    game.moveRight();
+    expect(game.getPiece().x).toBe(8);
+    game.moveRight();
+    expect(game.getPiece().x).toBe(8);
   });
 
   it("makes current shape part of the play area after it hits the bottom", () => {

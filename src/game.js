@@ -44,10 +44,28 @@ function Tetris() {
   };
   this.newPiece(Tetris.shapes.T[0]);
   this.moveLeft = () => {
-    piece.x = Math.max(0, piece.x - 1);
+    if (
+      !piece.shape.blocks.some(
+        ([x, y]) =>
+          this.getAreaContents(piece.x + (x - 1), piece.y + y) ||
+          piece.x + (x - 1) < 0
+      )
+    ) {
+      piece.x--;
+    } else {
+      console.log("Thunk left");
+    }
   };
   this.moveRight = () => {
-    piece.x = Math.min(area.width - piece.shape.width, piece.x + 1);
+    if (
+      !piece.shape.blocks.some(
+        ([x, y]) =>
+          this.getAreaContents(piece.x + (x + 1), piece.y + y) ||
+          piece.x + (x + 1) >= area.width
+      )
+    ) {
+      piece.x++;
+    }
   };
   this.getAreaContents = (x, y) => {
     return areaContents[y * area.width + x];
