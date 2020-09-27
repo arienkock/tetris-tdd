@@ -16,9 +16,7 @@ function Tetris() {
       this.drop();
     }
   };
-  this.pieceIsAtBottom = () => {
-    return collisionIfPieceMoves(0, 1);
-  };
+  this.pieceIsAtBottom = () => collisionIfPieceMoves(0, 1);
   this.newPiece = (shape) => {
     piece = {};
     piece.width = shape.width;
@@ -28,17 +26,16 @@ function Tetris() {
     piece.timeToDrop = this.ticksPerDrop;
   };
   this.drop = () => {
-    piece.timeToDrop = this.ticksPerDrop;
+    resetTimeToDrop();
     if (this.pieceIsAtBottom()) {
-      piece.shape.blocks.forEach(([x, y]) => {
-        setAreaContents(x + piece.x, y + piece.y, true);
-      });
+      putPieceInArea();
+      clearCompletedLines();
       this.newPiece(randomShape());
     } else {
       piece.y++;
     }
   };
-  this.newPiece(Tetris.shapes.T[0]);
+  this.newPiece(randomShape());
   this.moveLeft = () => {
     if (!collisionIfPieceMoves(-1, 0)) {
       piece.x--;
@@ -77,6 +74,38 @@ function Tetris() {
         y >= area.height
       );
     });
+  };
+  const putPieceInArea = () => {
+    piece.shape.blocks.forEach(([x, y]) => {
+      setAreaContents(x + piece.x, y + piece.y, true);
+    });
+  };
+  const resetTimeToDrop = () => {
+    piece.timeToDrop = this.ticksPerDrop;
+  };
+  const clearCompletedLines = () => {
+    for (let lineNum = 0; lineNum < area.height; lineNum++) {
+      if (isLineComplete(lineNum)) {
+        spliceLine(lineNum);
+        prependEmptyLine();
+      }
+    }
+  };
+  const isLineComplete = (lineNum) => {
+    for (let x = 0; x < area.width; x++) {
+      if (!this.getAreaContents(x, lineNum)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  const spliceLine = (lineNum) => {
+    areaContents.splice(lineNum * area.width, area.width);
+  };
+  const prependEmptyLine = () => {
+    for (let i = 0; i < area.width; i++) {
+      areaContents.unshift(undefined);
+    }
   };
 }
 
