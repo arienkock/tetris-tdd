@@ -17,11 +17,7 @@ function Tetris() {
     }
   };
   this.pieceIsAtBottom = () => {
-    return piece.shape.blocks.some(
-      ([x, y]) =>
-        piece.y + y + 1 >= area.height ||
-        this.getAreaContents(piece.x + x, piece.y + y + 1)
-    );
+    return collisionIfPieceMoves(0, 1);
   };
   this.newPiece = (shape) => {
     piece = {};
@@ -44,26 +40,12 @@ function Tetris() {
   };
   this.newPiece(Tetris.shapes.T[0]);
   this.moveLeft = () => {
-    if (
-      !piece.shape.blocks.some(
-        ([x, y]) =>
-          this.getAreaContents(piece.x + (x - 1), piece.y + y) ||
-          piece.x + (x - 1) < 0
-      )
-    ) {
+    if (!collisionIfPieceMoves(-1, 0)) {
       piece.x--;
-    } else {
-      console.log("Thunk left");
     }
   };
   this.moveRight = () => {
-    if (
-      !piece.shape.blocks.some(
-        ([x, y]) =>
-          this.getAreaContents(piece.x + (x + 1), piece.y + y) ||
-          piece.x + (x + 1) >= area.width
-      )
-    ) {
+    if (!collisionIfPieceMoves(1, 0)) {
       piece.x++;
     }
   };
@@ -84,6 +66,18 @@ function Tetris() {
   function setAreaContents(x, y, value) {
     areaContents[y * area.width + x] = value;
   }
+  const collisionIfPieceMoves = (dx, dy) => {
+    return piece.shape.blocks.some(([blockx, blocky]) => {
+      const x = piece.x + blockx + dx;
+      const y = piece.y + blocky + dy;
+      return (
+        this.getAreaContents(x, y) ||
+        x >= area.width ||
+        x < 0 ||
+        y >= area.height
+      );
+    });
+  };
 }
 
 function randomShape() {
