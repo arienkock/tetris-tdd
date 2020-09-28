@@ -77,9 +77,30 @@ function Tetris({
       for (let i = 0; i < rotations.length; i++) {
         let shape = rotations[i];
         if (shape === piece.shape) {
+          const previousShape = piece.shape;
           piece.shape = rotations[(i + 1) % rotations.length];
-          while (pieceCollidesIfMovedBy(0, 0)) {
-            piece.y--;
+          if (pieceCollidesIfMovedBy(0, 0)) {
+            for (let dy = 0; dy < 3; dy++) {
+              if (!pieceCollidesIfMovedBy(0, -dy)) {
+                piece.y -= dy;
+                break;
+              }
+            }
+            for (let dx = 0; dx < 3; dx++) {
+              if (!pieceCollidesIfMovedBy(-dx, 0)) {
+                piece.x -= dx;
+                break;
+              }
+            }
+            for (let dx = 0; dx < 3; dx++) {
+              if (!pieceCollidesIfMovedBy(dx, 0)) {
+                piece.x += dx;
+                break;
+              }
+            }
+          }
+          if (pieceCollidesIfMovedBy(0, 0)) {
+            piece.shape = previousShape;
           }
           return;
         }

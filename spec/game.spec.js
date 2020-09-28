@@ -169,7 +169,7 @@ describe("Tetris", () => {
     expect(game.isGameOver()).toBeTrue();
   });
 
-  it("if rotation causes a collision, moves the piece up", () => {
+  it("if rotation causes a collision, moves the piece up/left/right", () => {
     const game = new Tetris({ startOnCreation: false, areaHeight: 3 });
     game.newPiece(Tetris.shapes.L[0]);
     game.start();
@@ -177,6 +177,28 @@ describe("Tetris", () => {
     expect(game.getPiece().y).toBe(1);
     game.rotate();
     expect(game.getPiece().y).toBe(0);
+    game.rotate();
+    game.rotate();
+    game.moveRight();
+    game.moveRight();
+    game.moveRight();
+    game.moveRight();
+    game.moveRight();
+    expect(game.getPiece().x).toBe(8);
+    game.rotate();
+    expect(game.getPiece().x).toBe(7);
+    game.rotate();
+    game.moveLeft();
+    game.moveLeft();
+    game.moveLeft();
+    game.moveLeft();
+    game.moveLeft();
+    game.moveLeft();
+    game.moveLeft();
+    game.moveLeft();
+    expect(game.getPiece().x).toBe(-1);
+    game.rotate();
+    expect(game.getPiece().x).toBe(0);
   });
 
   it("can drop the piece faster than normal", () => {
