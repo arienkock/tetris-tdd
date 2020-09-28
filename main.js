@@ -62,35 +62,49 @@ document.addEventListener("keydown", (event) => {
 });
 
 paint();
-setInterval(tick, 100);
+setInterval(tick, 1/60);
 
 },{"./game":2}],2:[function(require,module,exports){
 const { parseShape } = require("./parseShape");
 
-function Tetris() {
+function Tetris({
+  startOnCreation = true,
+  areaWidth = 10,
+  areaHeight = 40,
+  ticksPerDrop = 2,
+} = {}) {
+  let gameActive = startOnCreation;
+  let gameOver = false;
   const area = {
-    width: 10,
-    height: 40,
+    width: areaWidth,
+    height: areaHeight,
   };
-  this.ticksPerDrop = 2;
+  this.ticksPerDrop = ticksPerDrop;
   let piece;
   let areaContents = new Array(area.width * area.height);
 
   this.getAreaDimensions = () => area;
   this.getPiece = () => piece;
+  this.start = () => (gameActive = true);
+  this.isGameOver = () => gameOver;
   this.tick = () => {
-    if (--piece.timeToDrop === 0) {
-      this.drop();
+    if (gameActive) {
+      if (--piece.timeToDrop <= 0) {
+        this.drop();
+      }
     }
   };
-  this.pieceIsAtBottom = () => collisionIfPieceMoves(0, 1);
+  this.pieceIsAtBottom = () => pieceCollidesIfMovedBy(0, 1);
   this.newPiece = (shape) => {
     piece = {};
-    piece.width = shape.width;
     piece.shape = shape;
-    piece.x = Math.floor((area.width - piece.width) / 2);
+    piece.x = Math.floor((area.width - shape.width) / 2);
     piece.y = 0;
     piece.timeToDrop = this.ticksPerDrop;
+    if (pieceCollidesIfMovedBy(0, 0)) {
+      gameOver = true;
+      gameActive = false;
+    }
   };
   this.drop = () => {
     resetTimeToDrop();
@@ -102,14 +116,13 @@ function Tetris() {
       piece.y++;
     }
   };
-  this.newPiece(randomShape());
   this.moveLeft = () => {
-    if (!collisionIfPieceMoves(-1, 0)) {
+    if (!pieceCollidesIfMovedBy(-1, 0)) {
       piece.x--;
     }
   };
   this.moveRight = () => {
-    if (!collisionIfPieceMoves(1, 0)) {
+    if (!pieceCollidesIfMovedBy(1, 0)) {
       piece.x++;
     }
   };
@@ -130,10 +143,10 @@ function Tetris() {
   function setAreaContents(x, y, value) {
     areaContents[y * area.width + x] = value;
   }
-  const collisionIfPieceMoves = (dx, dy) => {
+  const pieceCollidesIfMovedBy = (deltax, deltay) => {
     return piece.shape.blocks.some(([blockx, blocky]) => {
-      const x = piece.x + blockx + dx;
-      const y = piece.y + blocky + dy;
+      const x = piece.x + blockx + deltax;
+      const y = piece.y + blocky + deltay;
       return (
         this.getAreaContents(x, y) ||
         x >= area.width ||
@@ -174,6 +187,9 @@ function Tetris() {
       areaContents.unshift(undefined);
     }
   };
+  if (gameActive) {
+    this.newPiece(randomShape());
+  }
 }
 
 function randomShape() {

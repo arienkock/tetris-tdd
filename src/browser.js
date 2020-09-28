@@ -61,4 +61,4 @@ document.addEventListener("keydown", (event) => {
 });
 
 paint();
-setInterval(tick, 100);
+setInterval(tick, 1/60);

@@ -159,6 +159,15 @@ describe("Tetris", () => {
       expect(game.getAreaContents(i, 39)).toBeFalsy();
     }
   });
+
+  it("ends in Game Over when no space left for newPiece", () => {
+    const game = new Tetris({ startOnCreation: false, areaHeight: 2 });
+    game.newPiece(Tetris.shapes.O[0]);
+    game.start();
+    expect(game.isGameOver()).toBeFalse();
+    fullyDropPiece(game);
+    expect(game.isGameOver()).toBeTrue();
+  });
 });
 function fullyDropPiece(game) {
   while (!game.pieceIsAtBottom()) {
