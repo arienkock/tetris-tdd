@@ -4,7 +4,7 @@ function Tetris({
   startOnCreation = true,
   areaWidth = 10,
   areaHeight = 40,
-  ticksPerDrop = 2,
+  ticksPerDrop = 60,
 } = {}) {
   let gameActive = startOnCreation;
   let gameOver = false;
