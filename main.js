@@ -21,7 +21,7 @@ areaEl.innerHTML = html;
 function tick() {
   game.tick();
   paint();
-  if (game.isGameOver()) {
+  if (game.isGameOver() && !document.querySelector("h1.game-over")) {
     areaEl.insertAdjacentHTML(
       "beforeend",
       "<h1 class='game-over'>Game Over</h1>"
@@ -65,6 +65,16 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "ArrowUp") {
     game.rotate();
     paint();
+  } else if (event.key === "ArrowDown") {
+    game.fastDrop(true);
+    paint();
+  }
+});
+
+document.addEventListener("keyup", (event) => {
+  if (event.key === "ArrowDown") {
+    game.fastDrop(false);
+    paint();
   }
 });
 
@@ -101,6 +111,15 @@ function Tetris({
       }
     }
   };
+  this.fastDrop = (on) => {
+    if (on) {
+      this.ticksPerDrop = 1;
+      piece.timeToDrop = 1;
+    } else {
+      this.ticksPerDrop = ticksPerDrop;
+      piece.timeToDrop = ticksPerDrop;
+    }
+  };
   this.pieceIsAtBottom = () => pieceCollidesIfMovedBy(0, 1);
   this.newPiece = (shape) => {
     piece = {};
@@ -118,6 +137,7 @@ function Tetris({
     if (this.pieceIsAtBottom()) {
       putPieceInArea();
       clearCompletedLines();
+      this.fastDrop(false);
       this.newPiece(randomShape());
     } else {
       piece.y++;
@@ -142,6 +162,9 @@ function Tetris({
         let shape = rotations[i];
         if (shape === piece.shape) {
           piece.shape = rotations[(i + 1) % rotations.length];
+          while (pieceCollidesIfMovedBy(0, 0)) {
+            piece.y--;
+          }
           return;
         }
       }

@@ -27,6 +27,15 @@ function Tetris({
       }
     }
   };
+  this.fastDrop = (on) => {
+    if (on) {
+      this.ticksPerDrop = 1;
+      piece.timeToDrop = 1;
+    } else {
+      this.ticksPerDrop = ticksPerDrop;
+      piece.timeToDrop = ticksPerDrop;
+    }
+  };
   this.pieceIsAtBottom = () => pieceCollidesIfMovedBy(0, 1);
   this.newPiece = (shape) => {
     piece = {};
@@ -44,6 +53,7 @@ function Tetris({
     if (this.pieceIsAtBottom()) {
       putPieceInArea();
       clearCompletedLines();
+      this.fastDrop(false);
       this.newPiece(randomShape());
     } else {
       piece.y++;

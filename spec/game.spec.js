@@ -178,6 +178,30 @@ describe("Tetris", () => {
     game.rotate();
     expect(game.getPiece().y).toBe(0);
   });
+
+  it("can drop the piece faster than normal", () => {
+    const game = new Tetris({ ticksPerDrop: 5 });
+    expect(game.getPiece().y).toBe(0);
+    game.tick();
+    expect(game.getPiece().y).toBe(0);
+    game.fastDrop(true);
+    game.tick();
+    expect(game.getPiece().y).toBe(1);
+    game.tick();
+    expect(game.getPiece().y).toBe(2);
+    game.fastDrop(false);
+    expect(game.getPiece().y).toBe(2);
+    game.tick();
+    expect(game.getPiece().y).toBe(2);
+    game.tick();
+    expect(game.getPiece().y).toBe(2);
+    game.tick();
+    expect(game.getPiece().y).toBe(2);
+    game.tick();
+    expect(game.getPiece().y).toBe(2);
+    game.tick();
+    expect(game.getPiece().y).toBe(3);
+  });
 });
 function fullyDropPiece(game) {
   while (!game.pieceIsAtBottom()) {

@@ -64,6 +64,16 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "ArrowUp") {
     game.rotate();
     paint();
+  } else if (event.key === "ArrowDown") {
+    game.fastDrop(true);
+    paint();
+  }
+});
+
+document.addEventListener("keyup", (event) => {
+  if (event.key === "ArrowDown") {
+    game.fastDrop(false);
+    paint();
   }
 });
 
