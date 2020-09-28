@@ -15,11 +15,18 @@ for (let y = 0; y < height; y++) {
 
 let html = "<table>" + rows + "</table>";
 
-document.getElementById("area").innerHTML = html;
+const areaEl = document.getElementById("area");
+areaEl.innerHTML = html;
 
 function tick() {
   game.tick();
   paint();
+  if (game.isGameOver()) {
+    areaEl.insertAdjacentHTML(
+      "beforeend",
+      "<h1 class='game-over'>Game Over</h1>"
+    );
+  }
 }
 
 function paint() {
@@ -62,7 +69,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 paint();
-setInterval(tick, 1/60);
+setInterval(tick, 1 / 60);
 
 },{"./game":2}],2:[function(require,module,exports){
 const { parseShape } = require("./parseShape");

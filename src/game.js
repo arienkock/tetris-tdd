@@ -68,6 +68,9 @@ function Tetris({
         let shape = rotations[i];
         if (shape === piece.shape) {
           piece.shape = rotations[(i + 1) % rotations.length];
+          while (pieceCollidesIfMovedBy(0, 0)) {
+            piece.y--;
+          }
           return;
         }
       }

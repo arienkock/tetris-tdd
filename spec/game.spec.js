@@ -168,6 +168,16 @@ describe("Tetris", () => {
     fullyDropPiece(game);
     expect(game.isGameOver()).toBeTrue();
   });
+
+  it("if rotation causes a collision, moves the piece up", () => {
+    const game = new Tetris({ startOnCreation: false, areaHeight: 3 });
+    game.newPiece(Tetris.shapes.L[0]);
+    game.start();
+    game.drop();
+    expect(game.getPiece().y).toBe(1);
+    game.rotate();
+    expect(game.getPiece().y).toBe(0);
+  });
 });
 function fullyDropPiece(game) {
   while (!game.pieceIsAtBottom()) {
