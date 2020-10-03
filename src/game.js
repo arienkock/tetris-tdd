@@ -1,3 +1,4 @@
+const Score = require("./score");
 const Shapes = require("./shapes");
 
 function Tetris({
@@ -8,6 +9,7 @@ function Tetris({
 } = {}) {
   let gameActive = startOnCreation;
   let gameOver = false;
+  this.score = new Score();
   const area = {
     width: areaWidth,
     height: areaHeight,
@@ -125,12 +127,15 @@ function Tetris({
     piece.timeToDrop = this.ticksPerDrop;
   };
   const clearCompletedLines = () => {
+    let linesCleared = 0;
     for (let lineNum = 0; lineNum < area.height; lineNum++) {
       if (isLineComplete(lineNum)) {
+        linesCleared++;
         spliceLine(lineNum);
         prependEmptyLine();
       }
     }
+    this.score.tallyLines(linesCleared);
   };
   const isLineComplete = (lineNum) => {
     for (let x = 0; x < area.width; x++) {

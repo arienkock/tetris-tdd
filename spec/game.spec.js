@@ -1,6 +1,7 @@
 const { Tetris } = require("../src/game");
 const { parseShape } = require("../src/parseShape");
 const Shapes = require("../src/shapes");
+const { fullyDropPiece } = require("./game-helpers");
 
 describe("Tetris", () => {
   it("has a play area with height and width", () => {
@@ -208,13 +209,6 @@ describe("Tetris", () => {
     expect(game.getPiece().y).toBe(3);
   });
 });
-
-function fullyDropPiece(game) {
-  while (!game.pieceIsAtBottom()) {
-    game.drop();
-  }
-  game.drop();
-}
 
 function tickTilDrop(game) {
   for (let i = 0; i < game.ticksPerDrop; i++) {
