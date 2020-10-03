@@ -12,20 +12,20 @@ for (let y = 0; y < height; y++) {
   rows += "<tr>" + columns + "</tr>";
 }
 
-let html = "<table>" + rows + "</table>";
+const table = "<table>" + rows + "</table>";
+const status =
+  'Level: <span class="level"></span> -- Score: <span class="score"></span>';
+
+let html = table + status;
 
 const areaEl = document.getElementById("area");
 areaEl.innerHTML = html;
+const levelEl = areaEl.querySelector(".level");
+const scoreEl = areaEl.querySelector(".score");
 
 function tick() {
   game.tick();
   paint();
-  if (game.isGameOver() && !document.querySelector("h1.game-over")) {
-    areaEl.insertAdjacentHTML(
-      "beforeend",
-      "<h1 class='game-over'>Game Over</h1>"
-    );
-  }
 }
 
 function paint() {
@@ -42,6 +42,14 @@ function paint() {
         activate(x, y);
       }
     }
+  }
+  levelEl.textContent = game.score.level;
+  scoreEl.textContent = game.score.value;
+  if (game.isGameOver() && !document.querySelector("h1.game-over")) {
+    areaEl.insertAdjacentHTML(
+      "beforeend",
+      "<h1 class='game-over'>Game Over</h1>"
+    );
   }
 }
 
