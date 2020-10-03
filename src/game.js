@@ -1,4 +1,4 @@
-const { parseShape } = require("./parseShape");
+const Shapes = require("./shapes");
 
 function Tetris({
   startOnCreation = true,
@@ -54,7 +54,7 @@ function Tetris({
       putPieceInArea();
       clearCompletedLines();
       this.fastDrop(false);
-      this.newPiece(randomShape());
+      this.newPiece(Shapes.randomShape());
     } else {
       piece.y++;
     }
@@ -73,9 +73,8 @@ function Tetris({
     return areaContents[y * area.width + x];
   };
   this.rotate = () => {
-    const shape = Tetris.nextRotationOf(piece.shape);
     const previousShape = piece.shape;
-    piece.shape = shape;
+    piece.shape = Shapes.nextRotation(piece.shape);
     if (pieceCollidesIfMovedBy(0, 0)) {
       // Try moving piece in three directions until no collision
       [
@@ -96,6 +95,7 @@ function Tetris({
         }
       });
     }
+    // If we weren't able to move piece, rollback the rotation
     if (pieceCollidesIfMovedBy(0, 0)) {
       piece.shape = previousShape;
     }
@@ -149,131 +149,9 @@ function Tetris({
     }
   };
   if (gameActive) {
-    this.newPiece(randomShape());
+    this.newPiece(Shapes.randomShape());
   }
 }
-
-function randomShape() {
-  const shapeNames = Object.keys(Tetris.shapes);
-  const randomIndex = Math.floor(Math.random() * shapeNames.length);
-  const shape = shapeNames[randomIndex];
-  return Tetris.shapes[shape][0];
-}
-
-Tetris.shapes = {
-  J: [
-    parseShape(`
-#
-###
-      `),
-    parseShape(`
- ##
- #
- #
-      `),
-    parseShape(`
-
-###
-  #
-      `),
-    parseShape(`
- #
- #
-##
-      `),
-  ],
-  I: [
-    parseShape(`
-####
-      `),
-    parseShape(`
- #
- #
- #
- #
-      `),
-  ],
-  O: [
-    parseShape(`
-##
-##
-      `),
-  ],
-  T: [
-    parseShape(`
- #
-###
-      `),
-    parseShape(`
- #
- ##
- #
-      `),
-    parseShape(`
-  
-###
- #
-      `),
-    parseShape(`
- #
-##
- #
-      `),
-  ],
-  S: [
-    parseShape(`
- ##
-##
-      `),
-    parseShape(`
-#
-##
- #
-      `),
-  ],
-  Z: [
-    parseShape(`
-##
- ##
-      `),
-    parseShape(`
- #
-##
-#
-      `),
-  ],
-  L: [
-    parseShape(`
-  #
-###
-      `),
-    parseShape(`
- #
- #
- ##
-      `),
-    parseShape(`
-###
-#
-      `),
-    parseShape(`
-##
- #
- #
-      `),
-  ],
-};
-
-Tetris.nextRotationOf = (currentShape) => {
-  for (let rotations of Object.values(Tetris.shapes)) {
-    for (let i = 0; i < rotations.length; i++) {
-      let shape = rotations[i];
-      if (shape === currentShape) {
-        return rotations[(i + 1) % rotations.length];
-      }
-    }
-  }
-};
 
 module.exports = {
   Tetris,
