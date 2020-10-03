@@ -186,7 +186,7 @@ describe("Tetris", () => {
   });
 
   it("can drop the piece faster than normal", () => {
-    const game = new Tetris({ ticksPerDrop: 5 });
+    const game = new Tetris();
     expect(game.getPiece().y).toBe(0);
     game.tick();
     expect(game.getPiece().y).toBe(0);
@@ -197,16 +197,27 @@ describe("Tetris", () => {
     expect(game.getPiece().y).toBe(2);
     game.fastDrop(false);
     expect(game.getPiece().y).toBe(2);
-    game.tick();
-    expect(game.getPiece().y).toBe(2);
-    game.tick();
-    expect(game.getPiece().y).toBe(2);
-    game.tick();
-    expect(game.getPiece().y).toBe(2);
-    game.tick();
-    expect(game.getPiece().y).toBe(2);
+    for (let i = 0; i < 47; i++) {
+      game.tick();
+      expect(game.getPiece().y).toBe(2);
+    }
     game.tick();
     expect(game.getPiece().y).toBe(3);
+  });
+
+  it("speed is set according to level", () => {
+    const game = new Tetris();
+    expect(game.ticksPerDrop).toBe(48);
+    game.score.tallyLines(10);
+    fullyDropPiece(game);
+    expect(game.score.level).toBe(1);
+    expect(game.ticksPerDrop).toBe(43);
+    game.score.level = 28;
+    fullyDropPiece(game);
+    expect(game.ticksPerDrop).toBe(2);
+    game.score.level = 29;
+    fullyDropPiece(game);
+    expect(game.ticksPerDrop).toBe(1);
   });
 });
 

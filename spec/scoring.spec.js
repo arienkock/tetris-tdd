@@ -35,10 +35,22 @@ describe("scoring", () => {
        
        After this, the level advances by 1 for every 10 lines.`, () => {
     let score = new Score(5);
-    score.tallyLines(60);
+    scoreLines(score, 60);
     expect(score.level).toBe(6);
-    score.tallyLines(10);
+    scoreLines(score, 10);
     expect(score.level).toBe(7);
+
+    score = new Score(12);
+    scoreLines(score, 100);
+    expect(score.level).toBe(13);
+    scoreLines(score, 10);
+    expect(score.level).toBe(14);
+
+    score = new Score(16);
+    scoreLines(score, 110);
+    expect(score.level).toBe(17);
+    scoreLines(score, 10);
+    expect(score.level).toBe(18);
   });
 
   it("is part of the game", () => {
@@ -61,3 +73,9 @@ describe("scoring", () => {
     expect(game.score.value).toBe(140);
   });
 });
+
+function scoreLines(score, numLines) {
+  for (let i = 0; i < numLines; i++) {
+    score.tallyLines(1);
+  }
+}

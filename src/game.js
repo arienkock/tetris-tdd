@@ -5,7 +5,6 @@ function Tetris({
   startOnCreation = true,
   areaWidth = 10,
   areaHeight = 40,
-  ticksPerDrop = 60,
 } = {}) {
   let gameActive = startOnCreation;
   let gameOver = false;
@@ -14,7 +13,8 @@ function Tetris({
     width: areaWidth,
     height: areaHeight,
   };
-  this.ticksPerDrop = ticksPerDrop;
+  let levelBasedTicksPerDrop = gameSpeeds[gameSpeeds.length - 1][1];
+  this.ticksPerDrop = levelBasedTicksPerDrop;
   let piece;
   let areaContents = new Array(area.width * area.height);
 
@@ -34,8 +34,8 @@ function Tetris({
       this.ticksPerDrop = 1;
       piece.timeToDrop = 1;
     } else {
-      this.ticksPerDrop = ticksPerDrop;
-      piece.timeToDrop = ticksPerDrop;
+      this.ticksPerDrop = levelBasedTicksPerDrop;
+      piece.timeToDrop = levelBasedTicksPerDrop;
     }
   };
   this.pieceIsAtBottom = () => pieceCollidesIfMovedBy(0, 1);
@@ -136,6 +136,7 @@ function Tetris({
       }
     }
     this.score.tallyLines(linesCleared);
+    setGameSpeed();
   };
   const isLineComplete = (lineNum) => {
     for (let x = 0; x < area.width; x++) {
@@ -153,10 +154,36 @@ function Tetris({
       areaContents.unshift(undefined);
     }
   };
+  const setGameSpeed = () => {
+    if (this.score.level > 28) {
+      levelBasedTicksPerDrop = 1;
+    } else {
+      const [, speed] = gameSpeeds.find(([level]) => this.score.level >= level);
+      levelBasedTicksPerDrop = speed;
+    }
+    this.ticksPerDrop = levelBasedTicksPerDrop;
+  };
   if (gameActive) {
     this.newPiece(Shapes.randomShape());
   }
 }
+
+const gameSpeeds = [
+  [0, 48],
+  [1, 43],
+  [2, 38],
+  [3, 33],
+  [4, 28],
+  [5, 23],
+  [6, 18],
+  [7, 13],
+  [8, 8],
+  [9, 6],
+  [10, 5],
+  [13, 4],
+  [16, 3],
+  [19, 2],
+].reverse();
 
 module.exports = {
   Tetris,
