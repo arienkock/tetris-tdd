@@ -77,24 +77,24 @@ function Tetris({
     const previousShape = piece.shape;
     piece.shape = shape;
     if (pieceCollidesIfMovedBy(0, 0)) {
-      for (let dy = 0; dy < 3; dy++) {
-        if (!pieceCollidesIfMovedBy(0, -dy)) {
-          piece.y -= dy;
-          break;
+      // Try moving piece in three directions until no collision
+      [
+        ["y", -1],
+        ["x", -1],
+        ["x", +1],
+      ].forEach(([axis, sign]) => {
+        for (let delta = 0; delta < 3; delta++) {
+          const diff = sign * delta;
+          const collides =
+            axis === "x"
+              ? pieceCollidesIfMovedBy(diff, 0)
+              : pieceCollidesIfMovedBy(0, diff);
+          if (!collides) {
+            piece[axis] += diff;
+            break;
+          }
         }
-      }
-      for (let dx = 0; dx < 3; dx++) {
-        if (!pieceCollidesIfMovedBy(-dx, 0)) {
-          piece.x -= dx;
-          break;
-        }
-      }
-      for (let dx = 0; dx < 3; dx++) {
-        if (!pieceCollidesIfMovedBy(dx, 0)) {
-          piece.x += dx;
-          break;
-        }
-      }
+      });
     }
     if (pieceCollidesIfMovedBy(0, 0)) {
       piece.shape = previousShape;
