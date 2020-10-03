@@ -5,10 +5,11 @@ function Tetris({
   startOnCreation = true,
   areaWidth = 10,
   areaHeight = 40,
+  startLevel = 0,
 } = {}) {
   let gameActive = startOnCreation;
   let gameOver = false;
-  this.score = new Score();
+  this.score = new Score(startLevel);
   const area = {
     width: areaWidth,
     height: areaHeight,
@@ -26,6 +27,7 @@ function Tetris({
     if (gameActive) {
       if (--piece.timeToDrop <= 0) {
         this.drop();
+        applyLockDelay();
       }
     }
   };
@@ -84,7 +86,7 @@ function Tetris({
         ["x", -1],
         ["x", +1],
       ].forEach(([axis, sign]) => {
-        for (let delta = 0; delta < 3; delta++) {
+        for (let delta = 1; delta < 3; delta++) {
           const diff = sign * delta;
           const collides =
             axis === "x"
@@ -100,8 +102,9 @@ function Tetris({
     // If we weren't able to move piece, rollback the rotation
     if (pieceCollidesIfMovedBy(0, 0)) {
       piece.shape = previousShape;
+    } else {
+      applyLockDelay();
     }
-    return;
   };
   function setAreaContents(x, y, value) {
     areaContents[y * area.width + x] = value;
@@ -163,10 +166,18 @@ function Tetris({
     }
     this.ticksPerDrop = levelBasedTicksPerDrop;
   };
+  const applyLockDelay = () => {
+    if (this.pieceIsAtBottom()) {
+      piece.timeToDrop = Math.max(Tetris.lockDelay, levelBasedTicksPerDrop);
+    }
+  };
+  setGameSpeed();
   if (gameActive) {
     this.newPiece(Shapes.randomShape());
   }
 }
+
+Tetris.lockDelay = 30;
 
 const gameSpeeds = [
   [0, 48],

@@ -1,5 +1,6 @@
 const { Tetris } = require("../src/game");
 const { parseShape } = require("../src/parseShape");
+const Score = require("../src/score");
 const Shapes = require("../src/shapes");
 const { fullyDropPiece } = require("./game-helpers");
 
@@ -218,6 +219,27 @@ describe("Tetris", () => {
     game.score.level = 29;
     fullyDropPiece(game);
     expect(game.ticksPerDrop).toBe(1);
+  });
+
+  it("has lock delay", () => {
+    [
+      [29, Tetris.lockDelay],
+      [0, 48],
+    ].forEach(([startLevel, delayAtBottom]) => {
+      const game = new Tetris({ startLevel });
+      expect(game.score.level).toBe(startLevel);
+      game.newPiece(Shapes.getForm("I", 0));
+      while (!game.pieceIsAtBottom()) {
+        game.tick();
+      }
+      expect(game.pieceIsAtBottom()).toBeTrue();
+      expect(game.getPiece().timeToDrop).toBe(delayAtBottom);
+      game.tick();
+      expect(game.getPiece().timeToDrop).toBe(delayAtBottom - 1);
+      game.rotate();
+      expect(game.getPiece().shape).toEqual(Shapes.getForm("I", 1));
+      expect(game.getPiece().timeToDrop).toBe(delayAtBottom);
+    });
   });
 });
 
