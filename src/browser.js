@@ -28,7 +28,7 @@ const status =
   'Level:<span class="level"></span> Score:<span class="score"></span>';
 
 let html = `
-<div>
+<div class="status-and-area">
   <div class="status">${status}</div>
   <div class="area-container">
     ${table}

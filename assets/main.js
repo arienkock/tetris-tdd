@@ -29,7 +29,7 @@ const status =
   'Level:<span class="level"></span> Score:<span class="score"></span>';
 
 let html = `
-<div>
+<div class="status-and-area">
   <div class="status">${status}</div>
   <div class="area-container">
     ${table}
@@ -128,7 +128,11 @@ function Tetris({
 
   this.getAreaDimensions = () => area;
   this.getPiece = () => piece;
-  this.start = () => (gameActive = true);
+  this.start = () => {
+    gameActive = true;
+    this.newPiece(Shapes.randomShape());
+    this.nextShape = Shapes.randomShape();
+  };
   this.isGameOver = () => gameOver;
   this.tick = () => {
     if (gameActive) {
@@ -165,7 +169,8 @@ function Tetris({
       putPieceInArea();
       clearCompletedLines();
       this.fastDrop(false);
-      this.newPiece(Shapes.randomShape());
+      this.newPiece(this.nextShape);
+      this.nextShape = Shapes.randomShape();
     } else {
       piece.y++;
     }
@@ -213,9 +218,10 @@ function Tetris({
       applyLockDelay();
     }
   };
-  function setAreaContents(x, y, value) {
+  this.getNextShape = () => this.nextShape;
+  const setAreaContents = (x, y, value) => {
     areaContents[y * area.width + x] = value;
-  }
+  };
   const pieceCollidesIfMovedBy = (deltax, deltay) => {
     return piece.shape.blocks.some(([blockx, blocky]) => {
       const x = piece.x + blockx + deltax;
@@ -280,7 +286,7 @@ function Tetris({
   };
   setGameSpeed();
   if (gameActive) {
-    this.newPiece(Shapes.randomShape());
+    this.start();
   }
 }
 
