@@ -44,14 +44,14 @@ function Tetris({
       piece.timeToDrop = levelBasedTicksPerDrop;
     }
   };
-  this.pieceIsAtBottom = () => pieceCollidesIfMovedBy(0, 1);
+  this.pieceIsAtBottom = () => this.pieceCollidesIfMovedBy(0, 1);
   this.newPiece = (shape) => {
     piece = {};
     piece.shape = shape;
     piece.x = Math.floor((area.width - shape.width) / 2);
     piece.y = 0;
     piece.timeToDrop = this.ticksPerDrop;
-    if (pieceCollidesIfMovedBy(0, 0)) {
+    if (this.pieceCollidesIfMovedBy(0, 0)) {
       gameOver = true;
       gameActive = false;
     }
@@ -69,12 +69,12 @@ function Tetris({
     }
   };
   this.moveLeft = () => {
-    if (!pieceCollidesIfMovedBy(-1, 0)) {
+    if (!this.pieceCollidesIfMovedBy(-1, 0)) {
       piece.x--;
     }
   };
   this.moveRight = () => {
-    if (!pieceCollidesIfMovedBy(1, 0)) {
+    if (!this.pieceCollidesIfMovedBy(1, 0)) {
       piece.x++;
     }
   };
@@ -84,7 +84,7 @@ function Tetris({
   this.rotate = () => {
     const previousShape = piece.shape;
     piece.shape = Shapes.nextRotation(piece.shape);
-    if (pieceCollidesIfMovedBy(0, 0)) {
+    if (this.pieceCollidesIfMovedBy(0, 0)) {
       // Try moving piece in three directions until no collision
       [
         ["y", -1],
@@ -95,8 +95,8 @@ function Tetris({
           const diff = sign * delta;
           const collides =
             axis === "x"
-              ? pieceCollidesIfMovedBy(diff, 0)
-              : pieceCollidesIfMovedBy(0, diff);
+              ? this.pieceCollidesIfMovedBy(diff, 0)
+              : this.pieceCollidesIfMovedBy(0, diff);
           if (!collides) {
             piece[axis] += diff;
             break;
@@ -105,7 +105,7 @@ function Tetris({
       });
     }
     // If we weren't able to move piece, rollback the rotation
-    if (pieceCollidesIfMovedBy(0, 0)) {
+    if (this.pieceCollidesIfMovedBy(0, 0)) {
       piece.shape = previousShape;
     } else {
       applyLockDelay();
@@ -115,7 +115,7 @@ function Tetris({
   const setAreaContents = (x, y, value) => {
     areaContents[y * area.width + x] = value;
   };
-  const pieceCollidesIfMovedBy = (deltax, deltay) => {
+  this.pieceCollidesIfMovedBy = (deltax, deltay) => {
     return piece.shape.blocks.some(([blockx, blocky]) => {
       const x = piece.x + blockx + deltax;
       const y = piece.y + blocky + deltay;

@@ -63,6 +63,19 @@ function paint() {
       setActive(".area", x, y, !!game.getAreaContents(x, y));
     }
   }
+  let rowsTilPieceCollides = 1;
+  while (!game.pieceCollidesIfMovedBy(0, rowsTilPieceCollides)) {
+    rowsTilPieceCollides++;
+  }
+  piece.shape.blocks.forEach(([x, y]) => {
+    setActive(
+      ".area",
+      x + piece.x,
+      y + piece.y + rowsTilPieceCollides - 1,
+      true,
+      true
+    );
+  });
   piece.shape.blocks.forEach(([x, y]) => {
     setActive(".area", x + piece.x, y + piece.y, true);
   });
@@ -85,13 +98,17 @@ function paint() {
     colorPalette[game.score.level % colorPalette.length];
 }
 
-function setActive(scopeSelector, x, y, isActive) {
+function setActive(scopeSelector, x, y, isActive, isPreview) {
   const td = document.querySelector(`${scopeSelector} .block-${x}-${y}`);
   if (!td) {
     console.error("No block for", `.block-${x}-${y}`);
   } else if (isActive) {
-    td.classList.add("active");
+    td.classList.add(isPreview ? "preview" : "active");
+    if (!isPreview) {
+      td.classList.remove("preview");
+    }
   } else {
+    td.classList.remove("preview");
     td.classList.remove("active");
   }
 }
