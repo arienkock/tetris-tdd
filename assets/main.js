@@ -4,6 +4,17 @@ const { Tetris } = require("./game");
 const game = new Tetris();
 const { width, height } = game.getAreaDimensions();
 
+const colorPalette = [
+  "white",
+  "CornflowerBlue",
+  "coral",
+  "aquamarine",
+  "DarkOrchid",
+  "DarkOrange",
+  "DeepPink",
+  "Gold",
+];
+
 let rows = "";
 for (let y = 0; y < height; y++) {
   let columns = "";
@@ -13,16 +24,24 @@ for (let y = 0; y < height; y++) {
   rows += "<tr>" + columns + "</tr>";
 }
 
-const table = "<table>" + rows + "</table>";
+const table = "<table class='area'>" + rows + "</table>";
 const status =
-  'Level: <span class="level"></span> -- Score: <span class="score"></span>';
+  'Level:<span class="level"></span> Score:<span class="score"></span>';
 
-let html = table + status;
+let html = `
+<div>
+  <div class="status">${status}</div>
+  <div class="area-container">
+    ${table}
+    <div class='game-over hidden'><h1 class='game-over-label'>Game Over</h1><div>
+  </div>
+</div>`;
 
-const areaEl = document.getElementById("area");
-areaEl.innerHTML = html;
-const levelEl = areaEl.querySelector(".level");
-const scoreEl = areaEl.querySelector(".score");
+const gameEl = document.getElementById("game");
+gameEl.innerHTML = html;
+const levelEl = gameEl.querySelector(".level");
+const scoreEl = gameEl.querySelector(".score");
+const videoContainerEl = document.querySelector(".video-container");
 
 function tick() {
   game.tick();
@@ -30,36 +49,32 @@ function tick() {
 }
 
 function paint() {
-  document.querySelectorAll(".block").forEach((td) => {
-    td.classList.remove("active");
-  });
   const piece = game.getPiece();
-  piece.shape.blocks.forEach(([x, y]) => {
-    activate(x + piece.x, y + piece.y);
-  });
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      if (game.getAreaContents(x, y)) {
-        activate(x, y);
-      }
+      setActive(x, y, !!game.getAreaContents(x, y));
     }
   }
-  levelEl.textContent = game.score.level;
-  scoreEl.textContent = game.score.value;
+  piece.shape.blocks.forEach(([x, y]) => {
+    setActive(x + piece.x, y + piece.y, true);
+  });
+  levelEl.textContent = game.score.level.toString().padStart(3, "0").slice(-3);
+  scoreEl.textContent = game.score.value.toString().padStart(7, "0").slice(-7);
   if (game.isGameOver() && !document.querySelector("h1.game-over")) {
-    areaEl.insertAdjacentHTML(
-      "beforeend",
-      "<h1 class='game-over'>Game Over</h1>"
-    );
+    gameEl.querySelector(".game-over").classList.remove("hidden");
   }
+  videoContainerEl.style.backgroundColor =
+    colorPalette[game.score.level % colorPalette.length];
 }
 
-function activate(x, y) {
+function setActive(x, y, isActive) {
   const td = document.querySelector(`.block-${x}-${y}`);
   if (!td) {
     console.error("No block for", `.block-${x}-${y}`);
-  } else {
+  } else if (isActive) {
     td.classList.add("active");
+  } else {
+    td.classList.remove("active");
   }
 }
 
@@ -269,7 +284,7 @@ function Tetris({
   }
 }
 
-Tetris.lockDelay = 30;
+Tetris.lockDelay = 48;
 
 const gameSpeeds = [
   [0, 48],

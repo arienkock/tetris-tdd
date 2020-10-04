@@ -35,10 +35,12 @@ describe("Tetris", () => {
 
   it("considers piece at the bottom if the next drop puts the piece beyond the bottom of the play area", () => {
     const game = new Tetris();
-    game.newPiece(Shapes.getForm("I", 0));
+    game.newPiece(Shapes.getForm("O", 0));
     const { height } = game.getAreaDimensions();
-    while (game.getPiece().y < height - 1) {
-      expect(game.pieceIsAtBottom()).toBeFalse(game.getPiece());
+    let iterations = 0,
+      tooMany = 100;
+    while (game.getPiece().y < height - 2 || iterations > tooMany) {
+      expect(game.pieceIsAtBottom()).toBeFalse();
       game.drop();
     }
     expect(game.pieceIsAtBottom()).toBeTrue();
@@ -156,8 +158,8 @@ describe("Tetris", () => {
 
   it("if rotation causes a collision, moves the piece up/left/right", () => {
     const game = new Tetris({ startOnCreation: false, areaHeight: 3 });
-    game.newPiece(Shapes.getForm("L", 0));
     game.start();
+    game.newPiece(Shapes.getForm("L", 0));
     game.drop();
     expect(game.getPiece().y).toBe(1);
     game.rotate();
@@ -240,6 +242,16 @@ describe("Tetris", () => {
       expect(game.getPiece().shape).toEqual(Shapes.getForm("I", 1));
       expect(game.getPiece().timeToDrop).toBe(delayAtBottom);
     });
+  });
+
+  it("has a next shape preview", () => {
+    const game = new Tetris();
+    for (let i = 0; i < 4; i++) {
+      const nextShape = game.getNextShape();
+      expect(nextShape).toBeTruthy();
+      fullyDropPiece(game);
+      expect(game.getPiece().shape).toEqual(nextShape);
+    }
   });
 });
 
