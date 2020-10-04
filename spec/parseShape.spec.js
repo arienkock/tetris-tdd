@@ -11,6 +11,8 @@ describe("parseShape", () => {
       `)
     ).toEqual(
       jasmine.objectContaining({
+        width: 1,
+        height: 4,
         blocks: [
           [0, 0],
           [0, 1],
@@ -25,6 +27,8 @@ describe("parseShape", () => {
       `)
     ).toEqual(
       jasmine.objectContaining({
+        width: 4,
+        height: 1,
         blocks: [
           [0, 0],
           [1, 0],

@@ -14,6 +14,7 @@ const colorPalette = [
   "DeepPink",
   "Gold",
 ];
+const PREVIEW_AREA_SIZE = 6;
 
 function generateTableGrid(width, height) {
   let rows = "";
@@ -30,7 +31,9 @@ function generateTableGrid(width, height) {
 const playArea =
   '<table class="area">' + generateTableGrid(width, height) + "</table>";
 const previewArea =
-  '<table class="preview-area">' + generateTableGrid(4, 4) + "</table>";
+  '<table class="preview-area">' +
+  generateTableGrid(PREVIEW_AREA_SIZE, PREVIEW_AREA_SIZE) +
+  "</table>";
 const status =
   'Level:<span class="level"></span> Score:<span class="score"></span>';
 
@@ -64,13 +67,15 @@ function paint() {
   piece.shape.blocks.forEach(([x, y]) => {
     setActive(".area", x + piece.x, y + piece.y, true);
   });
-  for (let y = 0; y < 4; y++) {
-    for (let x = 0; x < 4; x++) {
+  for (let y = 0; y < PREVIEW_AREA_SIZE; y++) {
+    for (let x = 0; x < PREVIEW_AREA_SIZE; x++) {
       setActive(".preview-area", x, y, false);
     }
   }
+  const offsetX = Math.floor((PREVIEW_AREA_SIZE - game.nextShape.width) / 2);
+  const offsetY = Math.floor((PREVIEW_AREA_SIZE - game.nextShape.height) / 2);
   game.nextShape.blocks.forEach(([x, y]) => {
-    setActive(".preview-area", x, y, true);
+    setActive(".preview-area", x + offsetX, y + offsetY, true);
   });
   levelEl.textContent = game.score.level.toString().padStart(3, "0").slice(-3);
   scoreEl.textContent = game.score.value.toString().padStart(7, "0").slice(-7);
@@ -329,7 +334,8 @@ module.exports = {
 
 },{"./score":4,"./shapes":5}],3:[function(require,module,exports){
 function parseShape(string) {
-  let maxX = 0;
+  let maxX = 0,
+    maxY = 0;
   const split = string.split("\n");
   const rows = split.slice(1, split.length - 1);
   const blocks = [];
@@ -338,10 +344,11 @@ function parseShape(string) {
       if (s === "#") {
         blocks.push([x, y]);
         maxX = Math.max(x, maxX);
+        maxY = Math.max(y, maxY);
       }
     })
   );
-  return { blocks, width: maxX + 1 };
+  return { blocks, width: maxX + 1, height: maxY + 1 };
 }
 
 module.exports = {
