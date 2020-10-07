@@ -87,9 +87,9 @@ function Tetris({
     if (this.pieceCollidesIfMovedBy(0, 0)) {
       // Try moving piece in three directions until no collision
       [
-        ["y", -1],
         ["x", -1],
         ["x", +1],
+        ["y", -1],
       ].forEach(([axis, sign]) => {
         for (let delta = 1; delta < 3; delta++) {
           const diff = sign * delta;
