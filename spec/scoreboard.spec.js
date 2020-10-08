@@ -31,4 +31,14 @@ describe("scoreboard", () => {
       },
     ]);
   });
+
+  it("generates unique ids", () => {
+    const knownIds = new Set();
+    const scoreboard = new Scoreboard();
+    for (let i = 0; i < 10000; i++) {
+      const entryId = scoreboard.newEntry();
+      knownIds.add(entryId);
+    }
+    expect(knownIds.size).toBe(10000);
+  });
 });

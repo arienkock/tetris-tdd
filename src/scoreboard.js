@@ -1,8 +1,9 @@
 function Scoreboard() {
   const entries = [];
+  let idGen = 0;
   this.top10 = () => entries;
   this.newEntry = () => {
-    let id = 1;
+    let id = ++idGen;
     entries.push({
       id,
       name: "anonymous",
