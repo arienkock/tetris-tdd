@@ -93,10 +93,7 @@ function Tetris({
       ].forEach(([axis, sign]) => {
         for (let delta = 1; delta < 3; delta++) {
           const diff = sign * delta;
-          const collides =
-            axis === "x"
-              ? this.pieceCollidesIfMovedBy(diff, 0)
-              : this.pieceCollidesIfMovedBy(0, diff);
+          const collides = checkCollision(axis, diff);
           if (!collides) {
             piece[axis] += diff;
             break;
@@ -111,6 +108,10 @@ function Tetris({
       applyLockDelay();
     }
   };
+  const checkCollision = (axis, diff) =>
+    axis === "x"
+      ? this.pieceCollidesIfMovedBy(diff, 0)
+      : this.pieceCollidesIfMovedBy(0, diff);
   this.getNextShape = () => this.nextShape;
   const setAreaContents = (x, y, value) => {
     areaContents[y * area.width + x] = value;
