@@ -14,8 +14,8 @@ function Tetris({
     width: areaWidth,
     height: areaHeight,
   };
-  let levelBasedTicksPerDrop = gameSpeeds[gameSpeeds.length - 1][1];
-  this.ticksPerDrop = levelBasedTicksPerDrop;
+  let ticksPerDropAccordingToLevel = gameSpeeds[gameSpeeds.length - 1][1];
+  this.ticksPerDrop = ticksPerDropAccordingToLevel;
   let piece;
   let areaContents = new Array(area.width * area.height);
 
@@ -40,8 +40,8 @@ function Tetris({
       this.ticksPerDrop = 1;
       piece.timeToDrop = 1;
     } else {
-      this.ticksPerDrop = levelBasedTicksPerDrop;
-      piece.timeToDrop = levelBasedTicksPerDrop;
+      this.ticksPerDrop = ticksPerDropAccordingToLevel;
+      piece.timeToDrop = ticksPerDropAccordingToLevel;
     }
   };
   this.pieceIsAtBottom = () => this.pieceCollidesIfMovedBy(0, 1);
@@ -51,7 +51,10 @@ function Tetris({
     piece.x = Math.floor((area.width - shape.width) / 2);
     piece.y = 0;
     piece.timeToDrop = this.ticksPerDrop;
-    if (this.pieceCollidesIfMovedBy(0, 0)) {
+    checkGameOver();
+  };
+  const checkGameOver = () => {
+    if (collision() && piece.y === 0) {
       gameOver = true;
       gameActive = false;
     }
@@ -84,49 +87,49 @@ function Tetris({
   this.rotate = () => {
     const previousShape = piece.shape;
     piece.shape = Shapes.nextRotation(piece.shape);
-    if (this.pieceCollidesIfMovedBy(0, 0)) {
-      // Try moving piece in three directions until no collision
-      [
-        ["x", -1],
-        ["x", +1],
-        ["y", -1],
-      ].forEach(([axis, sign]) => {
-        for (let delta = 1; delta < 3; delta++) {
-          const diff = sign * delta;
-          const collides = checkCollision(axis, diff);
-          if (!collides) {
-            piece[axis] += diff;
-            break;
-          }
-        }
-      });
+    if (collision()) {
+      tryMovingPieceIntoAvailableSpace();
     }
     // If we weren't able to move piece, rollback the rotation
-    if (this.pieceCollidesIfMovedBy(0, 0)) {
+    if (collision()) {
       piece.shape = previousShape;
     } else {
       applyLockDelay();
     }
   };
-  const checkCollision = (axis, diff) =>
+  const tryMovingPieceIntoAvailableSpace = () => {
+    // Try moving piece in three directions until no collision
+    [
+      ["x", -1],
+      ["x", +1],
+      ["y", -1],
+    ].forEach(([axis, sign]) => {
+      for (let delta = 1; delta < 3; delta++) {
+        const amount = sign * delta;
+        if (!collidesWhenMovedInDirection(axis, amount)) {
+          piece[axis] += amount;
+          break;
+        }
+      }
+    });
+  };
+  const collidesWhenMovedInDirection = (axis, diff) =>
     axis === "x"
       ? this.pieceCollidesIfMovedBy(diff, 0)
       : this.pieceCollidesIfMovedBy(0, diff);
+  const collision = () => this.pieceCollidesIfMovedBy(0, 0);
   this.getNextShape = () => this.nextShape;
   const setAreaContents = (x, y, value) => {
     areaContents[y * area.width + x] = value;
   };
-  this.pieceCollidesIfMovedBy = (deltax, deltay) => {
-    return piece.shape.blocks.some(([blockx, blocky]) => {
-      const x = piece.x + blockx + deltax;
-      const y = piece.y + blocky + deltay;
-      return (
-        this.getAreaContents(x, y) ||
-        x >= area.width ||
-        x < 0 ||
-        y >= area.height
-      );
-    });
+  this.pieceCollidesIfMovedBy = (deltax, deltay) =>
+    piece.shape.blocks.some(collideWhenMovedBy(deltax, deltay));
+  const collideWhenMovedBy = (deltax, deltay) => ([blockx, blocky]) => {
+    const x = piece.x + blockx + deltax;
+    const y = piece.y + blocky + deltay;
+    return (
+      this.getAreaContents(x, y) || x >= area.width || x < 0 || y >= area.height
+    );
   };
   const putPieceInArea = () => {
     piece.shape.blocks.forEach(([x, y]) => {
@@ -166,16 +169,19 @@ function Tetris({
   };
   const setGameSpeed = () => {
     if (this.score.level > 28) {
-      levelBasedTicksPerDrop = 1;
+      ticksPerDropAccordingToLevel = 1;
     } else {
       const [, speed] = gameSpeeds.find(([level]) => this.score.level >= level);
-      levelBasedTicksPerDrop = speed;
+      ticksPerDropAccordingToLevel = speed;
     }
-    this.ticksPerDrop = levelBasedTicksPerDrop;
+    this.ticksPerDrop = ticksPerDropAccordingToLevel;
   };
   const applyLockDelay = () => {
     if (this.pieceIsAtBottom()) {
-      piece.timeToDrop = Math.max(Tetris.lockDelay, levelBasedTicksPerDrop);
+      piece.timeToDrop = Math.max(
+        Tetris.lockDelay,
+        ticksPerDropAccordingToLevel
+      );
     }
   };
   setGameSpeed();
