@@ -178,10 +178,7 @@ function Tetris({
   };
   const applyLockDelay = () => {
     if (this.pieceIsAtBottom()) {
-      piece.timeToDrop = Math.max(
-        Tetris.lockDelay,
-        ticksPerDropAccordingToLevel
-      );
+      piece.timeToDrop = Tetris.lockDelay;
     }
   };
   setGameSpeed();
@@ -190,7 +187,7 @@ function Tetris({
   }
 }
 
-Tetris.lockDelay = 48;
+Tetris.lockDelay = 15;
 
 const gameSpeeds = [
   [0, 48],

@@ -154,26 +154,59 @@ function updateScoreBoard() {
     .join("")}
 </table>`;
 }
-setInterval(updateScoreBoard, 500);
-
+setInterval(updateScoreBoard, 100);
+let alreadyPressingDown = false;
+let leftMoveInterval;
+let rightMoveInterval;
+const moveInterval = 1000 / 12;
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
-    game.moveLeft();
+    if (!leftMoveInterval) {
+      game.moveLeft();
+      let first = true;
+      leftMoveInterval = setInterval(() => {
+        if (first) {
+          first = false;
+          return;
+        }
+        game.moveLeft();
+      }, moveInterval);
+    }
   } else if (event.key === "ArrowRight") {
-    game.moveRight();
+    if (!rightMoveInterval) {
+      game.moveRight();
+      let first = true;
+      rightMoveInterval = setInterval(() => {
+        if (first) {
+          first = false;
+          return;
+        }
+        game.moveRight();
+      }, moveInterval);
+    }
   } else if (event.key === "ArrowUp") {
     game.rotate();
   } else if (event.key === "ArrowDown") {
-    game.fastDrop(true);
+    if (!alreadyPressingDown) {
+      alreadyPressingDown = true;
+      game.fastDrop(true);
+    }
   }
   paint();
 });
 
 document.addEventListener("keyup", (event) => {
   if (event.key === "ArrowDown") {
+    alreadyPressingDown = false;
     game.fastDrop(false);
-    paint();
+  } else if (event.key === "ArrowLeft") {
+    clearInterval(leftMoveInterval);
+    leftMoveInterval = undefined;
+  } else if (event.key === "ArrowRight") {
+    clearInterval(rightMoveInterval);
+    rightMoveInterval = undefined;
   }
+  paint();
 });
 
 paint();
