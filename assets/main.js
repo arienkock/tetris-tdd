@@ -1,18 +1,18 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const { Tetris } = require("./game");
+const Scoreboard = require("./scoreboard");
 
 const game = new Tetris();
 const { width, height } = game.getAreaDimensions();
 
 const colorPalette = [
   "white",
-  "CornflowerBlue",
-  "coral",
-  "aquamarine",
-  "DarkOrchid",
-  "DarkOrange",
-  "DeepPink",
-  "Gold",
+  "D5D6EA",
+  "F6F6EB",
+  "D7ECD9",
+  "F5D5CB",
+  "F6ECF5",
+  "F3DDF2",
 ];
 const PREVIEW_AREA_SIZE = 6;
 
@@ -38,11 +38,18 @@ const status =
   'Level:<span class="level"></span> Score:<span class="score"></span>';
 
 let html = `
-<div class="status-and-area">
-  <div class="status">${status}</div>
-  <div class="area-container">
-    <div class="area-and-preview">${playArea}${previewArea}</div>
-    <div class='game-over hidden'><h1 class='game-over-label'>Game Over</h1><div>
+<div class="game-and-scoreboard">
+  <div class="status-and-area">
+    <div class="status">${status}</div>
+    <div class="area-container">
+      <div class="area-and-preview">${playArea}${previewArea}</div>
+      <div class="game-over hidden"><h1 class="game-over-label">Game Over</h1>Reload page to play again</div>
+    </div>
+  </div>
+  <div class="scoreboard">
+    <h1>scores</h1>
+    <label>Your name: <input class="name-input"/></label>
+    <div class="score-entries"></div>
   </div>
 </div>`;
 
@@ -113,21 +120,54 @@ function setActive(scopeSelector, x, y, isActive, isPreview) {
     td.classList.remove("active");
   }
 }
+const scoreboard = new Scoreboard(window.firebase.firestore());
+let previousScore = {
+  value: 0,
+  name: "Anonymous",
+};
+const scoreId = scoreboard.newEntry();
+const nameInput = document.querySelector(".name-input");
+nameInput.value = previousScore.name;
+const scoreEntries = document.querySelector(".score-entries");
+function updateScoreBoard() {
+  if (
+    previousScore.value !== game.score.value ||
+    previousScore.name !== nameInput.value
+  ) {
+    previousScore.value = game.score.value;
+    previousScore.name = nameInput.value;
+    scoreboard.updateScore(
+      scoreId,
+      nameInput.value,
+      game.score.value,
+      game.score.level
+    );
+  }
+  // Render scores
+  scoreEntries.innerHTML = `
+<table>
+  <tr><th>Name</th><th>Score</th><th>Max level</th></tr>
+  ${scoreboard
+    .top10()
+    .map(
+      (s) => `<tr><td>${s.name}</td><td>${s.score}</td><td>${s.level}</td></tr>`
+    )
+    .join("")}
+</table>`;
+}
+setInterval(updateScoreBoard, 500);
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
     game.moveLeft();
-    paint();
   } else if (event.key === "ArrowRight") {
     game.moveRight();
-    paint();
   } else if (event.key === "ArrowUp") {
     game.rotate();
-    paint();
   } else if (event.key === "ArrowDown") {
     game.fastDrop(true);
-    paint();
   }
+  paint();
 });
 
 document.addEventListener("keyup", (event) => {
@@ -138,9 +178,9 @@ document.addEventListener("keyup", (event) => {
 });
 
 paint();
-setInterval(tick, 1 / 60);
+setInterval(tick, 1000 / 60);
 
-},{"./game":2}],2:[function(require,module,exports){
+},{"./game":2,"./scoreboard":5}],2:[function(require,module,exports){
 const Score = require("./score");
 const Shapes = require("./shapes");
 
@@ -157,8 +197,8 @@ function Tetris({
     width: areaWidth,
     height: areaHeight,
   };
-  let levelBasedTicksPerDrop = gameSpeeds[gameSpeeds.length - 1][1];
-  this.ticksPerDrop = levelBasedTicksPerDrop;
+  let ticksPerDropAccordingToLevel = gameSpeeds[gameSpeeds.length - 1][1];
+  this.ticksPerDrop = ticksPerDropAccordingToLevel;
   let piece;
   let areaContents = new Array(area.width * area.height);
 
@@ -183,8 +223,8 @@ function Tetris({
       this.ticksPerDrop = 1;
       piece.timeToDrop = 1;
     } else {
-      this.ticksPerDrop = levelBasedTicksPerDrop;
-      piece.timeToDrop = levelBasedTicksPerDrop;
+      this.ticksPerDrop = ticksPerDropAccordingToLevel;
+      piece.timeToDrop = ticksPerDropAccordingToLevel;
     }
   };
   this.pieceIsAtBottom = () => this.pieceCollidesIfMovedBy(0, 1);
@@ -194,7 +234,10 @@ function Tetris({
     piece.x = Math.floor((area.width - shape.width) / 2);
     piece.y = 0;
     piece.timeToDrop = this.ticksPerDrop;
-    if (this.pieceCollidesIfMovedBy(0, 0)) {
+    checkGameOver();
+  };
+  const checkGameOver = () => {
+    if (collision() && piece.y === 0) {
       gameOver = true;
       gameActive = false;
     }
@@ -227,48 +270,49 @@ function Tetris({
   this.rotate = () => {
     const previousShape = piece.shape;
     piece.shape = Shapes.nextRotation(piece.shape);
-    if (this.pieceCollidesIfMovedBy(0, 0)) {
-      // Try moving piece in three directions until no collision
-      [
-        ["y", -1],
-        ["x", -1],
-        ["x", +1],
-      ].forEach(([axis, sign]) => {
-        for (let delta = 1; delta < 3; delta++) {
-          const diff = sign * delta;
-          const collides =
-            axis === "x"
-              ? this.pieceCollidesIfMovedBy(diff, 0)
-              : this.pieceCollidesIfMovedBy(0, diff);
-          if (!collides) {
-            piece[axis] += diff;
-            break;
-          }
-        }
-      });
+    if (collision()) {
+      tryMovingPieceIntoAvailableSpace();
     }
     // If we weren't able to move piece, rollback the rotation
-    if (this.pieceCollidesIfMovedBy(0, 0)) {
+    if (collision()) {
       piece.shape = previousShape;
     } else {
       applyLockDelay();
     }
   };
+  const tryMovingPieceIntoAvailableSpace = () => {
+    // Try moving piece in three directions until no collision
+    [
+      ["x", -1],
+      ["x", +1],
+      ["y", -1],
+    ].forEach(([axis, sign]) => {
+      for (let delta = 1; delta < 3; delta++) {
+        const amount = sign * delta;
+        if (!collidesWhenMovedInDirection(axis, amount)) {
+          piece[axis] += amount;
+          break;
+        }
+      }
+    });
+  };
+  const collidesWhenMovedInDirection = (axis, diff) =>
+    axis === "x"
+      ? this.pieceCollidesIfMovedBy(diff, 0)
+      : this.pieceCollidesIfMovedBy(0, diff);
+  const collision = () => this.pieceCollidesIfMovedBy(0, 0);
   this.getNextShape = () => this.nextShape;
   const setAreaContents = (x, y, value) => {
     areaContents[y * area.width + x] = value;
   };
-  this.pieceCollidesIfMovedBy = (deltax, deltay) => {
-    return piece.shape.blocks.some(([blockx, blocky]) => {
-      const x = piece.x + blockx + deltax;
-      const y = piece.y + blocky + deltay;
-      return (
-        this.getAreaContents(x, y) ||
-        x >= area.width ||
-        x < 0 ||
-        y >= area.height
-      );
-    });
+  this.pieceCollidesIfMovedBy = (deltax, deltay) =>
+    piece.shape.blocks.some(collideWhenMovedBy(deltax, deltay));
+  const collideWhenMovedBy = (deltax, deltay) => ([blockx, blocky]) => {
+    const x = piece.x + blockx + deltax;
+    const y = piece.y + blocky + deltay;
+    return (
+      this.getAreaContents(x, y) || x >= area.width || x < 0 || y >= area.height
+    );
   };
   const putPieceInArea = () => {
     piece.shape.blocks.forEach(([x, y]) => {
@@ -308,16 +352,19 @@ function Tetris({
   };
   const setGameSpeed = () => {
     if (this.score.level > 28) {
-      levelBasedTicksPerDrop = 1;
+      ticksPerDropAccordingToLevel = 1;
     } else {
       const [, speed] = gameSpeeds.find(([level]) => this.score.level >= level);
-      levelBasedTicksPerDrop = speed;
+      ticksPerDropAccordingToLevel = speed;
     }
-    this.ticksPerDrop = levelBasedTicksPerDrop;
+    this.ticksPerDrop = ticksPerDropAccordingToLevel;
   };
   const applyLockDelay = () => {
     if (this.pieceIsAtBottom()) {
-      piece.timeToDrop = Math.max(Tetris.lockDelay, levelBasedTicksPerDrop);
+      piece.timeToDrop = Math.max(
+        Tetris.lockDelay,
+        ticksPerDropAccordingToLevel
+      );
     }
   };
   setGameSpeed();
@@ -349,7 +396,7 @@ module.exports = {
   Tetris,
 };
 
-},{"./score":4,"./shapes":5}],3:[function(require,module,exports){
+},{"./score":4,"./shapes":6}],3:[function(require,module,exports){
 function parseShape(string) {
   let maxX = 0,
     maxY = 0;
@@ -394,6 +441,42 @@ function Score(startLevel = 0) {
 module.exports = Score;
 
 },{}],5:[function(require,module,exports){
+function Scoreboard(db) {
+  let entries = [];
+  const tetrisScores = db.collection("tetris-scores");
+  tetrisScores
+    .orderBy("score", "desc")
+    .limit(10)
+    .onSnapshot((querySnapshot) => {
+      entries = querySnapshot.docs.map((queryDocSnapshot) =>
+        queryDocSnapshot.data()
+      );
+    });
+  this.top10 = () => entries;
+  this.newEntry = () => {
+    const docRef = tetrisScores.doc();
+    docRef.set(
+      {
+        name: "anonymous",
+        score: 0,
+        level: 0,
+      },
+      { merge: true }
+    );
+    return docRef.id;
+  };
+  this.updateScore = (id, name, score, level) => {
+    return tetrisScores.doc(id).update({
+      name,
+      score,
+      level,
+    });
+  };
+}
+
+module.exports = Scoreboard;
+
+},{}],6:[function(require,module,exports){
 const { parseShape } = require("./parseShape");
 
 const forms = {

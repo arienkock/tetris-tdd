@@ -1,17 +1,17 @@
 const { Tetris } = require("./game");
+const Scoreboard = require("./scoreboard");
 
 const game = new Tetris();
 const { width, height } = game.getAreaDimensions();
 
 const colorPalette = [
   "white",
-  "CornflowerBlue",
-  "coral",
-  "aquamarine",
-  "DarkOrchid",
-  "DarkOrange",
-  "DeepPink",
-  "Gold",
+  "D5D6EA",
+  "F6F6EB",
+  "D7ECD9",
+  "F5D5CB",
+  "F6ECF5",
+  "F3DDF2",
 ];
 const PREVIEW_AREA_SIZE = 6;
 
@@ -37,11 +37,18 @@ const status =
   'Level:<span class="level"></span> Score:<span class="score"></span>';
 
 let html = `
-<div class="status-and-area">
-  <div class="status">${status}</div>
-  <div class="area-container">
-    <div class="area-and-preview">${playArea}${previewArea}</div>
-    <div class='game-over hidden'><h1 class='game-over-label'>Game Over</h1><div>
+<div class="game-and-scoreboard">
+  <div class="status-and-area">
+    <div class="status">${status}</div>
+    <div class="area-container">
+      <div class="area-and-preview">${playArea}${previewArea}</div>
+      <div class="game-over hidden"><h1 class="game-over-label">Game Over</h1>Reload page to play again</div>
+    </div>
+  </div>
+  <div class="scoreboard">
+    <h1>scores</h1>
+    <label>Your name: <input class="name-input"/></label>
+    <div class="score-entries"></div>
   </div>
 </div>`;
 
@@ -112,21 +119,54 @@ function setActive(scopeSelector, x, y, isActive, isPreview) {
     td.classList.remove("active");
   }
 }
+const scoreboard = new Scoreboard(window.firebase.firestore());
+let previousScore = {
+  value: 0,
+  name: "Anonymous",
+};
+const scoreId = scoreboard.newEntry();
+const nameInput = document.querySelector(".name-input");
+nameInput.value = previousScore.name;
+const scoreEntries = document.querySelector(".score-entries");
+function updateScoreBoard() {
+  if (
+    previousScore.value !== game.score.value ||
+    previousScore.name !== nameInput.value
+  ) {
+    previousScore.value = game.score.value;
+    previousScore.name = nameInput.value;
+    scoreboard.updateScore(
+      scoreId,
+      nameInput.value,
+      game.score.value,
+      game.score.level
+    );
+  }
+  // Render scores
+  scoreEntries.innerHTML = `
+<table>
+  <tr><th>Name</th><th>Score</th><th>Max level</th></tr>
+  ${scoreboard
+    .top10()
+    .map(
+      (s) => `<tr><td>${s.name}</td><td>${s.score}</td><td>${s.level}</td></tr>`
+    )
+    .join("")}
+</table>`;
+}
+setInterval(updateScoreBoard, 500);
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
     game.moveLeft();
-    paint();
   } else if (event.key === "ArrowRight") {
     game.moveRight();
-    paint();
   } else if (event.key === "ArrowUp") {
     game.rotate();
-    paint();
   } else if (event.key === "ArrowDown") {
     game.fastDrop(true);
-    paint();
   }
+  paint();
 });
 
 document.addEventListener("keyup", (event) => {
@@ -137,4 +177,4 @@ document.addEventListener("keyup", (event) => {
 });
 
 paint();
-setInterval(tick, 1 / 60);
+setInterval(tick, 1000 / 60);

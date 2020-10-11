@@ -49,12 +49,7 @@
         top: 0;
         left: 0;
         background-color: rgba(100%, 100%, 100%, 75%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .game-over-label {
-        display: inline-block;
+        text-align: center;
       }
       .area-container {
         position: relative;
@@ -91,19 +86,47 @@
         flex-direction: column;
         align-items: center;
       }
+      .game-and-scoreboard {
+        display: flex;
+        position: relative;
+      }
+      .score-entries td {
+        text-align: center;
+      }
+      .score-entries table {
+        display: block;
+        width: 100%;
+      }
     </style>
   </head>
   <body>
     <div class="video-container">
-      <video
+      <!-- <video
         class="video-bg"
         src="assets/videobg.mp4"
         autoplay
         muted
         loop
-      ></video>
+      ></video> -->
     </div>
     <div id="game"></div>
+    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-analytics.js"></script>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyCpaP_bCtwi8_K-ynzYhQoEsjsQUxLDjtU",
+        authDomain: "tetris-sortof.firebaseapp.com",
+        databaseURL: "https://tetris-sortof.firebaseio.com",
+        projectId: "tetris-sortof",
+        storageBucket: "tetris-sortof.appspot.com",
+        messagingSenderId: "291223696871",
+        appId: "1:291223696871:web:aa282fbbed425a88c2f942",
+        measurementId: "G-B174QQXBQL",
+      };
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+    </script>
     <script src="assets/main.js"></script>
   </body>
 </html>

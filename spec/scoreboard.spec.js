@@ -83,12 +83,11 @@ function createMockDb() {
                     data = updateData;
                   }
                   listener({
-                    docs: () =>
-                      Object.values(docs).map((docRef) => {
-                        return {
-                          data: () => docRef._data(),
-                        };
-                      }),
+                    docs: Object.values(docs).map((docRef) => {
+                      return {
+                        data: () => docRef._data(),
+                      };
+                    }),
                   });
                 },
               };

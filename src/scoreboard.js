@@ -5,9 +5,9 @@ function Scoreboard(db) {
     .orderBy("score", "desc")
     .limit(10)
     .onSnapshot((querySnapshot) => {
-      entries = querySnapshot
-        .docs()
-        .map((queryDocSnapshot) => queryDocSnapshot.data());
+      entries = querySnapshot.docs.map((queryDocSnapshot) =>
+        queryDocSnapshot.data()
+      );
     });
   this.top10 = () => entries;
   this.newEntry = () => {
