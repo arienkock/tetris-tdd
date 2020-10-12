@@ -224,10 +224,7 @@ describe("Tetris", () => {
   });
 
   it("has lock delay", () => {
-    [
-      [29, Tetris.lockDelay],
-      [0, 48],
-    ].forEach(([startLevel, delayAtBottom]) => {
+    [29, 0].forEach((startLevel) => {
       const game = new Tetris({ startLevel });
       expect(game.score.level).toBe(startLevel);
       game.newPiece(Shapes.getForm("I", 0));
@@ -235,12 +232,12 @@ describe("Tetris", () => {
         game.tick();
       }
       expect(game.pieceIsAtBottom()).toBeTrue();
-      expect(game.getPiece().timeToDrop).toBe(delayAtBottom);
+      expect(game.getPiece().timeToDrop).toBe(Tetris.lockDelay);
       game.tick();
-      expect(game.getPiece().timeToDrop).toBe(delayAtBottom - 1);
+      expect(game.getPiece().timeToDrop).toBe(Tetris.lockDelay - 1);
       game.rotate();
       expect(game.getPiece().shape).toEqual(Shapes.getForm("I", 1));
-      expect(game.getPiece().timeToDrop).toBe(delayAtBottom);
+      expect(game.getPiece().timeToDrop).toBe(Tetris.lockDelay);
     });
   });
 

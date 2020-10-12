@@ -5,7 +5,7 @@ const Scoreboard = require("./scoreboard");
 const game = new Tetris();
 const { width, height } = game.getAreaDimensions();
 
-const colorPalette = [
+const bgColorPalette = [
   "white",
   "D5D6EA",
   "F6F6EB",
@@ -103,7 +103,7 @@ function paint() {
     gameEl.querySelector(".game-over").classList.remove("hidden");
   }
   videoContainerEl.style.backgroundColor =
-    colorPalette[game.score.level % colorPalette.length];
+    bgColorPalette[game.score.level % colorPalette.length];
 }
 
 function setActive(scopeSelector, x, y, isActive, isPreview) {
