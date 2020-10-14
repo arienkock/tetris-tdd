@@ -102,7 +102,7 @@ function paint() {
     gameEl.querySelector(".game-over").classList.remove("hidden");
   }
   videoContainerEl.style.backgroundColor =
-    bgColorPalette[game.score.level % colorPalette.length];
+    bgColorPalette[game.score.level % bgColorPalette.length];
 }
 
 function setActive(scopeSelector, x, y, isActive, isPreview) {
