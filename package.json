@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jasmine",
-    "test:w": "nodemon --exec \"npm test\""
+    "test:w": "nodemon --exec \"npm test\"",
+    "test:coverage": "nyc --include 'src/**/*.js' -r html -r text npm test",
+    "test:mutate": "stryker run"
   },
   "keywords": [],
   "author": "",

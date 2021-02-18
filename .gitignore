@@ -3,3 +3,4 @@ node_modules/
 .stryker-tmp
 .nyc_output/
 reports/
+coverage/
