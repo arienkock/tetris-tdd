@@ -144,16 +144,21 @@ function updateScoreBoard() {
     );
   }
   // Render scores
-  scoreEntries.innerHTML = `
-<table>
-  <tr><th>Name</th><th>Score</th><th>Max level</th></tr>
-  ${scoreboard
-    .top10()
-    .map(
-      (s) => `<tr><td>${s.name}</td><td>${s.score}</td><td>${s.level}</td></tr>`
-    )
-    .join("")}
-</table>`;
+  const table = document.createElement("table");
+  const header = table.insertRow();
+  ["Name", "Score", "Max level"].forEach((text) => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    header.appendChild(th);
+  });
+  scoreboard.top10().forEach((s) => {
+    const row = table.insertRow();
+    [s.name, s.score, s.level].forEach((val) => {
+      const td = row.insertCell();
+      td.textContent = val;
+    });
+  });
+  scoreEntries.replaceChildren(table);
 }
 setInterval(updateScoreBoard, 100);
 let alreadyPressingDown = false;
