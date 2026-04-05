@@ -54,7 +54,7 @@ let html = `
 </div>`;
 
 const gameEl = document.getElementById("game");
-gameEl.innerHTML = html;
+gameEl.appendChild(document.createRange().createContextualFragment(html));
 const levelEl = gameEl.querySelector(".level");
 const scoreEl = gameEl.querySelector(".score");
 const videoContainerEl = document.querySelector(".video-container");
@@ -145,18 +145,21 @@ function updateScoreBoard() {
   }
   // Render scores
   const table = document.createElement("table");
-  const header = table.insertRow();
+  const headerRow = document.createElement("tr");
   ["Name", "Score", "Max level"].forEach((text) => {
     const th = document.createElement("th");
     th.textContent = text;
-    header.appendChild(th);
+    headerRow.appendChild(th);
   });
+  table.appendChild(headerRow);
   scoreboard.top10().forEach((s) => {
-    const row = table.insertRow();
+    const row = document.createElement("tr");
     [s.name, s.score, s.level].forEach((val) => {
-      const td = row.insertCell();
+      const td = document.createElement("td");
       td.textContent = val;
+      row.appendChild(td);
     });
+    table.appendChild(row);
   });
   scoreEntries.replaceChildren(table);
 }

@@ -53,7 +53,7 @@ let html = `
 </div>`;
 
 const gameEl = document.getElementById("game");
-gameEl.innerHTML = html;
+gameEl.appendChild(document.createRange().createContextualFragment(html));
 const levelEl = gameEl.querySelector(".level");
 const scoreEl = gameEl.querySelector(".score");
 const videoContainerEl = document.querySelector(".video-container");
@@ -143,16 +143,24 @@ function updateScoreBoard() {
     );
   }
   // Render scores
-  scoreEntries.innerHTML = `
-<table>
-  <tr><th>Name</th><th>Score</th><th>Max level</th></tr>
-  ${scoreboard
-    .top10()
-    .map(
-      (s) => `<tr><td>${s.name}</td><td>${s.score}</td><td>${s.level}</td></tr>`
-    )
-    .join("")}
-</table>`;
+  const table = document.createElement("table");
+  const headerRow = document.createElement("tr");
+  ["Name", "Score", "Max level"].forEach((text) => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
+  scoreboard.top10().forEach((s) => {
+    const row = document.createElement("tr");
+    [s.name, s.score, s.level].forEach((val) => {
+      const td = document.createElement("td");
+      td.textContent = val;
+      row.appendChild(td);
+    });
+    table.appendChild(row);
+  });
+  scoreEntries.replaceChildren(table);
 }
 setInterval(updateScoreBoard, 100);
 let alreadyPressingDown = false;
